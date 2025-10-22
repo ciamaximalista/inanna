@@ -173,9 +173,11 @@ if (is_logged_in()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inanna - Creador de Presentaciones</title>
+    <link rel="icon" type="image/png" href="inanna.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
     <?php if (is_logged_in()): ?>
     <script src="js/composition.js" defer></script>
+    <script src="js/resources.js" defer></script>
     <?php endif; ?>
     <style>
         /* --- Base & Typography --- */
@@ -488,18 +490,73 @@ if (is_logged_in()) {
                     <p>No has subido ningún archivo todavía.</p>
                 <?php else: ?>
                     <?php foreach ($resources as $resource): ?>
-                        <div class="resource-item" style="width: 150px;">
+                        <div class="resource-item" style="width: 180px; display:flex; flex-direction:column; gap:6px;">
                             <?php 
                                 $file_ext = strtolower(pathinfo($resource, PATHINFO_EXTENSION));
-                                if (in_array($file_ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])):
+                                $is_image = in_array($file_ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                if ($is_image):
                             ?>
                                 <img src="<?php echo htmlspecialchars($resource); ?>" alt="<?php echo basename($resource); ?>" style="width: 100%; height: auto; border-radius: 4px;">
                             <?php else: ?>
                                 <a href="<?php echo htmlspecialchars($resource); ?>" target="_blank"><?php echo basename($resource); ?></a>
                             <?php endif; ?>
+                            <div style="display:flex; justify-content:space-between; gap:6px; font-family:'Gabarito', sans-serif;">
+                                <button type="button" class="resource-edit-btn" data-resource-path="<?php echo htmlspecialchars($resource); ?>" <?php echo $is_image ? '' : 'disabled'; ?> style="flex:1; font-family:inherit;">Editar</button>
+                                <button type="button" class="resource-delete-btn" data-resource-path="<?php echo htmlspecialchars($resource); ?>" style="flex:1; font-family:inherit;">Borrar</button>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
+            </div>
+            <div id="resource-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1100; align-items:center; justify-content:center;">
+                <div style="background:#fff; padding:20px; border-radius:10px; max-width:900px; width:95%; max-height:90vh; overflow:auto; position:relative;">
+                    <span id="resource-edit-close" style="position:absolute; top:10px; right:15px; font-size:28px; cursor:pointer;">&times;</span>
+                    <h3>Editar recurso</h3>
+                    <form id="resource-edit-form">
+                        <div style="display:flex; flex-wrap:wrap; gap:20px;">
+                            <div style="flex:1 1 360px;">
+                                <canvas id="resource-edit-canvas" style="width:100%; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;"></canvas>
+                            </div>
+                            <div style="flex:1 1 280px; min-width:260px; display:flex; flex-direction:column; gap:12px;">
+                                <label for="resource-edit-filename">Nombre de archivo</label>
+                                <input type="text" id="resource-edit-filename" style="width:100%;" required>
+
+                                <label for="resource-brightness">Brillo: <span id="resource-brightness-value">0</span></label>
+                                <input type="range" id="resource-brightness" min="-100" max="100" value="0">
+
+                                <label for="resource-contrast">Contraste: <span id="resource-contrast-value">0</span></label>
+                                <input type="range" id="resource-contrast" min="-100" max="100" value="0">
+
+                                <fieldset style="border:1px solid #ccc; border-radius:6px; padding:10px;">
+                                    <legend>Recorte</legend>
+                                    <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px;">
+                                        <div>
+                                            <label for="resource-crop-x">X</label>
+                                            <input type="number" id="resource-crop-x" min="0" value="0" style="width:100%;">
+                                        </div>
+                                        <div>
+                                            <label for="resource-crop-y">Y</label>
+                                            <input type="number" id="resource-crop-y" min="0" value="0" style="width:100%;">
+                                        </div>
+                                        <div>
+                                            <label for="resource-crop-width">Ancho</label>
+                                            <input type="number" id="resource-crop-width" min="1" value="100" style="width:100%;">
+                                        </div>
+                                        <div>
+                                            <label for="resource-crop-height">Alto</label>
+                                            <input type="number" id="resource-crop-height" min="1" value="100" style="width:100%;">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                                    <button type="button" id="resource-edit-cancel">Cancelar</button>
+                                    <button type="submit" id="resource-edit-save">Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
