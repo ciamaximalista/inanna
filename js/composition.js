@@ -309,8 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     let leftCell = contentBlock;
                     let rightCell = `<div class="slide-square-cell">${mediaBlock}</div>`;
-                    let leftStyle = `width:60%; padding-right:${gapLargePx}px; vertical-align: middle; height:100%;`;
-                    let rightStyle = 'width:40%; vertical-align: middle; height:100%;';
+                    let leftStyle = `width:70%; padding-right:${gapLargePx}px; vertical-align: middle; height:100%;`;
+                    let rightStyle = 'width:30%; vertical-align: middle; height:100%;';
                     slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-content-cell" style="${leftStyle}">${leftCell}</td><td class="slide-cell slide-media-cell" style="${rightStyle}">${rightCell}</td></tr></table>`;
                 }
                 break;
@@ -318,8 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     let leftCell = `<div class="slide-square-cell">${mediaBlock}</div>`;
                     let rightCell = contentBlock;
-                    let leftStyle = 'width:40%; vertical-align: middle; height:100%;';
-                    let rightStyle = `width:60%; padding-left:${gapLargePx}px; vertical-align: middle; height:100%;`;
+                    let leftStyle = 'width:30%; vertical-align: middle; height:100%;';
+                    let rightStyle = `width:70%; padding-left:${gapLargePx}px; vertical-align: middle; height:100%;`;
                     slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-media-cell" style="${leftStyle}">${leftCell}</td><td class="slide-cell slide-content-cell" style="${rightStyle}">${rightCell}</td></tr></table>`;
                 }
                 break;

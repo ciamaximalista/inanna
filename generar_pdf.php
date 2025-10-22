@@ -307,7 +307,7 @@ if (isset($_POST['presentation_data'])) {
         '.slide-media.placeholder span { display: block; }',
         '.slide-media.has-image { color: transparent; }',
         '.slide-square-cell { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; }',
-        '.slide-media.square { width: 90mm; height: 90mm; max-width: 100%; border-radius: 18px; }',
+        '.slide-media.square { width: 90mm; height: 90mm; max-width: 100%; border-radius: 18px; margin-left: auto; }',
         '.slide-media.square.placeholder { display: flex; align-items: center; justify-content: center; }',
         '.slide-page h1, .slide-page h2, .slide-page h3, .slide-page h4, .slide-page h5, .slide-page h6 { font-family: "' . addslashes($titleFont) . '", sans-serif; font-weight: ' . $titleWeightBold . '; margin: 0; line-height: 1.15; page-break-before: avoid; break-before: avoid; page-break-after: avoid; break-after: avoid; }',
         '.slide-page h1 { color: ' . $styles['color_h1'] . '; margin-bottom: 0.2em; font-size: ' . $h1FontPt . 'pt; }',
@@ -398,8 +398,8 @@ if (isset($_POST['presentation_data'])) {
         } elseif ($template === 'g') {
             $leftCell = $contentBlock;
             $rightCell = '<div class="slide-square-cell">' . $mediaBlock . '</div>';
-            $leftStyle = 'width:60%; padding-right:' . $gapLargeMm . 'mm; vertical-align: middle; height:100%;';
-            $rightStyle = 'width:40%; vertical-align: middle; height:100%;';
+            $leftStyle = 'width:70%; padding-right:' . $gapLargeMm . 'mm; vertical-align: middle; height:100%;';
+            $rightStyle = 'width:30%; vertical-align: middle; height:100%;';
             $slideTable = '<table class="slide-table"><tr>'
                 . '<td class="slide-cell slide-content-cell" style="' . $leftStyle . '">' . $leftCell . '</td>'
                 . '<td class="slide-cell slide-media-cell" style="' . $rightStyle . '">' . $rightCell . '</td>'
@@ -407,8 +407,8 @@ if (isset($_POST['presentation_data'])) {
         } elseif ($template === 'h') {
             $leftCell = '<div class="slide-square-cell">' . $mediaBlock . '</div>';
             $rightCell = $contentBlock;
-            $leftStyle = 'width:40%; vertical-align: middle; height:100%;';
-            $rightStyle = 'width:60%; padding-left:' . $gapLargeMm . 'mm; vertical-align: middle; height:100%;';
+            $leftStyle = 'width:30%; vertical-align: middle; height:100%;';
+            $rightStyle = 'width:70%; padding-left:' . $gapLargeMm . 'mm; vertical-align: middle; height:100%;';
             $slideTable = '<table class="slide-table"><tr>'
                 . '<td class="slide-cell slide-media-cell" style="' . $leftStyle . '">' . $leftCell . '</td>'
                 . '<td class="slide-cell slide-content-cell" style="' . $rightStyle . '">' . $rightCell . '</td>'
