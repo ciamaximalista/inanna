@@ -1,0 +1,9 @@
+
+{
+    "name": "ruralnext/inanna",
+    "description": "Aplicación para crear presentaciones.",
+    "require": {
+        "erusev/parsedown": "^1.7",
+        "dompdf/dompdf": "^2.0"
+    }
+}
