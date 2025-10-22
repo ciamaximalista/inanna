@@ -236,12 +236,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 border: none;
                 color: transparent;
             }
+            .slide-square-cell {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+            }
+            .slide-media.square {
+                width: 80%;
+                max-width: ${mmToPx(90)}px;
+                aspect-ratio: 1 / 1;
+                height: auto;
+            }
+            .slide-media.square.placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         </style>`;
 
         const layoutClassMap = {
             a: 'layout-a',
             z: 'layout-z',
             y: 'layout-y',
+            g: 'layout-g',
+            h: 'layout-h',
             b: 'layout-b',
             c: 'layout-c',
             e: 'layout-e',
@@ -252,14 +272,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentClass = template === 'a' ? 'slide-content centered' : 'slide-content';
         const contentBlock = `<div class="${contentClass}"><div class="slide-content-inner"><div>${slideHtmlContent}</div></div></div>`;
 
+        const requiresSquareMedia = template === 'g' || template === 'h';
         let mediaBlock = '';
         if (template !== 'a') {
+            const mediaBaseClass = requiresSquareMedia ? 'slide-media square' : 'slide-media';
             const hasImage = Boolean(imageSrc);
             if (hasImage) {
                 const escaped = imageSrc.replace(/(["'\\])/g, '\\$1');
-                mediaBlock = `<div class="slide-media has-image" data-placeholder-id="1" style="background-image:url('${escaped}');"></div>`;
+                mediaBlock = `<div class="${mediaBaseClass} has-image" data-placeholder-id="1" style="background-image:url('${escaped}');"></div>`;
             } else {
-                mediaBlock = `<div class="slide-media placeholder" data-placeholder-id="1"><span>Haz clic para añadir imagen</span></div>`;
+                mediaBlock = `<div class="${mediaBaseClass} placeholder" data-placeholder-id="1"><span>Haz clic para añadir imagen</span></div>`;
             }
         }
 
@@ -280,6 +302,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     let rightCell = contentBlock;
                     let leftStyle = `width:48%; padding-right:${gapLargePx}px; vertical-align: middle; height:100%;`;
                     let rightStyle = `width:52%; padding-left:${gapLargePx}px; vertical-align: middle; height:100%;`;
+                    slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-media-cell" style="${leftStyle}">${leftCell}</td><td class="slide-cell slide-content-cell" style="${rightStyle}">${rightCell}</td></tr></table>`;
+                }
+                break;
+            case 'g':
+                {
+                    let leftCell = contentBlock;
+                    let rightCell = `<div class="slide-square-cell">${mediaBlock}</div>`;
+                    let leftStyle = `width:60%; padding-right:${gapLargePx}px; vertical-align: middle; height:100%;`;
+                    let rightStyle = 'width:40%; vertical-align: middle; height:100%;';
+                    slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-content-cell" style="${leftStyle}">${leftCell}</td><td class="slide-cell slide-media-cell" style="${rightStyle}">${rightCell}</td></tr></table>`;
+                }
+                break;
+            case 'h':
+                {
+                    let leftCell = `<div class="slide-square-cell">${mediaBlock}</div>`;
+                    let rightCell = contentBlock;
+                    let leftStyle = 'width:40%; vertical-align: middle; height:100%;';
+                    let rightStyle = `width:60%; padding-left:${gapLargePx}px; vertical-align: middle; height:100%;`;
                     slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-media-cell" style="${leftStyle}">${leftCell}</td><td class="slide-cell slide-content-cell" style="${rightStyle}">${rightCell}</td></tr></table>`;
                 }
                 break;

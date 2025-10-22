@@ -306,6 +306,9 @@ if (isset($_POST['presentation_data'])) {
         '.slide-media.placeholder { border: 2px dashed #d0d0d0; color: #777; font-size: ' . $placeholderFontPt . 'pt; text-align: center; padding: ' . (6 * $scaleFactor) . 'mm; }',
         '.slide-media.placeholder span { display: block; }',
         '.slide-media.has-image { color: transparent; }',
+        '.slide-square-cell { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; }',
+        '.slide-media.square { width: 90mm; height: 90mm; max-width: 100%; border-radius: 18px; }',
+        '.slide-media.square.placeholder { display: flex; align-items: center; justify-content: center; }',
         '.slide-page h1, .slide-page h2, .slide-page h3, .slide-page h4, .slide-page h5, .slide-page h6 { font-family: "' . addslashes($titleFont) . '", sans-serif; font-weight: ' . $titleWeightBold . '; margin: 0; line-height: 1.15; page-break-before: avoid; break-before: avoid; page-break-after: avoid; break-after: avoid; }',
         '.slide-page h1 { color: ' . $styles['color_h1'] . '; margin-bottom: 0.2em; font-size: ' . $h1FontPt . 'pt; }',
         '.slide-page h2 { color: ' . $styles['color_h2'] . '; font-size: ' . $h2FontPt . 'pt; }',
@@ -324,6 +327,8 @@ if (isset($_POST['presentation_data'])) {
         'a' => 'layout-a',
         'z' => 'layout-z',
         'y' => 'layout-y',
+        'g' => 'layout-g',
+        'h' => 'layout-h',
         'b' => 'layout-b',
         'c' => 'layout-c',
         'e' => 'layout-e',
@@ -348,9 +353,11 @@ if (isset($_POST['presentation_data'])) {
         $contentInner = '<div>' . $slideHtmlContent . '</div>';
         $contentBlock = '<div class="' . $contentClass . '"><div class="slide-content-inner">' . $contentInner . '</div></div>';
 
+        $requiresSquareMedia = in_array($template, ['g', 'h'], true);
         $mediaBlock = '';
         if ($template !== 'a') {
-            $mediaBlock = '<div class="slide-media placeholder"><span>Añade una imagen</span></div>';
+            $mediaClass = 'slide-media' . ($requiresSquareMedia ? ' square' : '');
+            $mediaBlock = '<div class="' . $mediaClass . ' placeholder"><span>Añade una imagen</span></div>';
             if (!empty($imageSrc)) {
                 $backgroundUrl = null;
                 if (filter_var($imageSrc, FILTER_VALIDATE_URL)) {
@@ -377,9 +384,9 @@ if (isset($_POST['presentation_data'])) {
 
                 if ($backgroundUrl !== null) {
                     $safeBackground = htmlspecialchars($backgroundUrl, ENT_QUOTES, 'UTF-8');
-                    $mediaBlock = '<div class="slide-media has-image" style="background-image:url(' . $safeBackground . ');"></div>';
+                    $mediaBlock = '<div class="' . $mediaClass . ' has-image" style="background-image:url(' . $safeBackground . ');"></div>';
                 } else {
-                    $mediaBlock = '<div class="slide-media placeholder"><span>Imagen no disponible</span></div>';
+                    $mediaBlock = '<div class="' . $mediaClass . ' placeholder"><span>Imagen no disponible</span></div>';
                 }
             }
         }
@@ -387,6 +394,24 @@ if (isset($_POST['presentation_data'])) {
         if ($layoutClass === 'layout-a') {
             $slideTable = '<table class="slide-table"><tr>'
                 . '<td class="slide-cell slide-content-cell" style="height:100%; text-align:center; vertical-align: middle;">' . $contentBlock . '</td>'
+                . '</tr></table>';
+        } elseif ($template === 'g') {
+            $leftCell = $contentBlock;
+            $rightCell = '<div class="slide-square-cell">' . $mediaBlock . '</div>';
+            $leftStyle = 'width:60%; padding-right:' . $gapLargeMm . 'mm; vertical-align: middle; height:100%;';
+            $rightStyle = 'width:40%; vertical-align: middle; height:100%;';
+            $slideTable = '<table class="slide-table"><tr>'
+                . '<td class="slide-cell slide-content-cell" style="' . $leftStyle . '">' . $leftCell . '</td>'
+                . '<td class="slide-cell slide-media-cell" style="' . $rightStyle . '">' . $rightCell . '</td>'
+                . '</tr></table>';
+        } elseif ($template === 'h') {
+            $leftCell = '<div class="slide-square-cell">' . $mediaBlock . '</div>';
+            $rightCell = $contentBlock;
+            $leftStyle = 'width:40%; vertical-align: middle; height:100%;';
+            $rightStyle = 'width:60%; padding-left:' . $gapLargeMm . 'mm; vertical-align: middle; height:100%;';
+            $slideTable = '<table class="slide-table"><tr>'
+                . '<td class="slide-cell slide-media-cell" style="' . $leftStyle . '">' . $leftCell . '</td>'
+                . '<td class="slide-cell slide-content-cell" style="' . $rightStyle . '">' . $rightCell . '</td>'
                 . '</tr></table>';
         } elseif (in_array($layoutClass, ['layout-z', 'layout-y', 'layout-e', 'layout-f'], true)) {
             $leftCell = $contentBlock;
