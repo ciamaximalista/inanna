@@ -90,158 +90,60 @@ function inanna_redirect_with_tab($tab, $edit = '') {
 }
 
 function inanna_render_slide_preview($slide, $styles) {
-    $mmToPx = function ($mm) { return ($mm / 25.4) * 96; };
-
-    $scale_factor = 1.16;
-    $page_width_px = $mmToPx(297);
-    $page_height_px = $mmToPx(210);
-    $padding_top_px = $mmToPx(8);
-    $padding_left_px = $mmToPx(10);
-    $padding_right_px = $mmToPx(1);
-    $padding_bottom_px = $mmToPx(1);
-    $content_padding_right_px = $mmToPx(2);
-    $content_padding_left_px = $mmToPx(6 * $scale_factor);
-    $gap_large_px = $mmToPx(12 * $scale_factor);
-    $gap_small_px = $mmToPx(6 * $scale_factor);
-    $shift_right_px = $mmToPx(2.5);
-    $extra_right_px = $mmToPx(85);
-    $extra_bottom_px = $mmToPx(60);
-    $total_width_px = $page_width_px + $extra_right_px + $shift_right_px;
-    $total_height_px = $page_height_px + $extra_bottom_px;
-    $translate_x = $mmToPx(46);
-    $translate_y = $mmToPx(25);
-
-    $paragraph_font_pt = 20 * $scale_factor;
-    $h1_font_pt = 44 * $scale_factor;
-    $h2_font_pt = 36 * $scale_factor;
-    $h3_font_pt = 30 * $scale_factor;
-    $media_placeholder_font_pt = 12 * $scale_factor;
-
     $styles = inanna_collect_styles_from_input($styles, inanna_default_style_values());
 
     if (!is_array($slide)) {
-        return '<div class="archive-card-preview"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#666;">Sin diapositivas</div></div>';
+        return '<div class="archive-card-preview"><div class="archive-preview-empty">Sin diapositivas</div></div>';
     }
 
-    $template = $slide['template'] ?? 'a';
-    $image_src = trim((string)($slide['image'] ?? ''));
     $markdown_html = (string)($slide['markdown_html'] ?? '');
     if (trim(strip_tags($markdown_html)) === '') {
-        $markdown_html = '<p style="opacity:0.55;">Sin contenido en la primera diapositiva.</p>';
+        $markdown_html = '<p>Sin contenido</p>';
     }
 
-    $highlight = $styles['color_highlight'] ?? '#ea2f28';
-    $content_class = $template === 'a' ? 'archive-preview-content centered' : 'archive-preview-content';
-    $content_block = '<div class="' . $content_class . '"><div class="archive-preview-content-inner"><div>' . $markdown_html . '</div></div></div>';
+    $title = '';
+    $subtitle = '';
 
-    $media_block = '';
-    if ($template !== 'a') {
-        $base_media_class = ($template === 'g' || $template === 'h') ? 'archive-preview-media square' : 'archive-preview-media';
-        if ($image_src !== '') {
-            $media_block = '<div class="' . $base_media_class . ' has-image" style="background-image:url(\'' . htmlspecialchars($image_src, ENT_QUOTES, 'UTF-8') . '\');"></div>';
-        } else {
-            $media_block = '<div class="' . $base_media_class . ' placeholder"><span>Sin imagen</span></div>';
-        }
-        if ($template === 'g' || $template === 'h') {
-            $media_block = '<div class="archive-preview-square-wrapper">' . $media_block . '</div>';
-        }
+    if (preg_match('/<h1[^>]*>(.*?)<\/h1>/i', $markdown_html, $matches)) {
+        $title = trim(strip_tags($matches[1]));
+    }
+    if ($title === '' && preg_match('/<h2[^>]*>(.*?)<\/h2>/i', $markdown_html, $matches)) {
+        $title = trim(strip_tags($matches[1]));
+    }
+    if (preg_match('/<h2[^>]*>(.*?)<\/h2>/i', $markdown_html, $matches)) {
+        $subtitle = trim(strip_tags($matches[1]));
+    }
+    if ($subtitle === '' && preg_match('/<p[^>]*>(.*?)<\/p>/i', $markdown_html, $matches)) {
+        $subtitle = trim(strip_tags($matches[1]));
     }
 
-    $gap_large = number_format($gap_large_px, 2, '.', '');
-    $gap_small = number_format($gap_small_px, 2, '.', '');
-
-    $slide_table = '';
-    switch ($template) {
-        case 'z':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell content" style="width:52%;padding-right:' . $gap_large . 'px;">' . $content_block . '</td><td class="archive-preview-cell media" style="width:48%;">' . $media_block . '</td></tr></table>';
-            break;
-        case 'y':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell media" style="width:48%;padding-right:' . $gap_large . 'px;">' . $media_block . '</td><td class="archive-preview-cell content" style="width:52%;padding-left:' . $gap_large . 'px;">' . $content_block . '</td></tr></table>';
-            break;
-        case 'g':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell content" style="width:70%;padding-right:' . $gap_large . 'px;">' . $content_block . '</td><td class="archive-preview-cell media" style="width:30%;">' . $media_block . '</td></tr></table>';
-            break;
-        case 'h':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell media" style="width:30%;">' . $media_block . '</td><td class="archive-preview-cell content" style="width:70%;padding-left:' . $gap_large . 'px;">' . $content_block . '</td></tr></table>';
-            break;
-        case 'e':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell content" style="width:78%;padding-right:' . $gap_large . 'px;">' . $content_block . '</td><td class="archive-preview-cell media" style="width:22%;">' . $media_block . '</td></tr></table>';
-            break;
-        case 'f':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell media" style="width:22%;">' . $media_block . '</td><td class="archive-preview-cell content" style="width:78%;padding-left:' . $gap_large . 'px;">' . $content_block . '</td></tr></table>';
-            break;
-        case 'b':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell media" style="height:24%;padding-bottom:' . $gap_small . 'px;">' . $media_block . '</td></tr><tr><td class="archive-preview-cell content" style="height:76%;padding-top:' . $gap_small . 'px;">' . $content_block . '</td></tr></table>';
-            break;
-        case 'c':
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell content" style="height:76%;padding-bottom:' . $gap_small . 'px;">' . $content_block . '</td></tr><tr><td class="archive-preview-cell media" style="height:24%;padding-top:' . $gap_small . 'px;">' . $media_block . '</td></tr></table>';
-            break;
-        default:
-            $slide_table = '<table class="archive-preview-table"><tr><td class="archive-preview-cell content" style="height:100%;text-align:center;">' . $content_block . '</td></tr></table>';
-            break;
+    if ($title === '') {
+        $title = 'Presentación sin título';
     }
 
-    $layout_class_map = [
-        'a' => 'layout-a',
-        'z' => 'layout-z',
-        'y' => 'layout-y',
-        'g' => 'layout-g',
-        'h' => 'layout-h',
-        'b' => 'layout-b',
-        'c' => 'layout-c',
-        'e' => 'layout-e',
-        'f' => 'layout-f',
-    ];
-    $layout_class = $layout_class_map[$template] ?? 'layout-a';
+    $image_src = trim((string)($slide['image'] ?? ''));
+    $highlight = htmlspecialchars($styles['color_highlight'] ?? '#ea2f28', ENT_QUOTES, 'UTF-8');
+    $title_color = htmlspecialchars($styles['color_h1'] ?? $highlight, ENT_QUOTES, 'UTF-8');
+    $text_color = htmlspecialchars($styles['color_text'] ?? '#2f2f2f', ENT_QUOTES, 'UTF-8');
+    $box_color = htmlspecialchars($styles['color_box'] ?? '#f4f6f8', ENT_QUOTES, 'UTF-8');
+    $bg_color = htmlspecialchars($styles['color_bg'] ?? '#ffffff', ENT_QUOTES, 'UTF-8');
+    $font_title = "'" . addslashes($styles['font_title'] ?? 'Gabarito') . "', sans-serif";
+    $font_text = "'" . addslashes($styles['font_text'] ?? 'Gabarito') . "', sans-serif";
 
-    $font_title_css = "'" . addslashes($styles['font_title'] ?? 'Gabarito') . "', sans-serif";
-    $font_text_css = "'" . addslashes($styles['font_text'] ?? 'Gabarito') . "', sans-serif";
+    $bg_layer = $image_src !== ''
+        ? '<div class="archive-preview-bg" style="background-image:url(\'' . htmlspecialchars($image_src, ENT_QUOTES, 'UTF-8') . '\');"></div>'
+        : '<div class="archive-preview-bg" style="background-color:' . $bg_color . ';"></div>';
 
-    $page_style = sprintf(
-        'width:%1$.2fpx;height:%2$.2fpx;padding:%3$.2fpx %4$.2fpx %5$.2fpx %6$.2fpx;background-color:%7$s;color:%8$s;font-family:%9$s;font-size:%10$.2fpt;--archive-highlight:%11$s;--archive-box:%12$s;--archive-font-title:%13$s;--archive-font-text:%14$s;',
-        $page_width_px,
-        $page_height_px,
-        $padding_top_px,
-        $padding_right_px,
-        $padding_bottom_px,
-        $padding_left_px,
-        htmlspecialchars($styles['color_bg'] ?? '#ffffff', ENT_QUOTES, 'UTF-8'),
-        htmlspecialchars($styles['color_text'] ?? '#2f2f2f', ENT_QUOTES, 'UTF-8'),
-        htmlspecialchars($font_text_css, ENT_QUOTES, 'UTF-8'),
-        $paragraph_font_pt,
-        htmlspecialchars($highlight, ENT_QUOTES, 'UTF-8'),
-        htmlspecialchars($styles['color_box'] ?? '#f4f6f8', ENT_QUOTES, 'UTF-8'),
-        htmlspecialchars($font_title_css, ENT_QUOTES, 'UTF-8'),
-        htmlspecialchars($font_text_css, ENT_QUOTES, 'UTF-8')
-    );
-
-    $root_style = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box;overflow:hidden;';
-
-    $container_width = 240;
-    $stage_scale = max(0.12, min(0.22, $container_width / $total_width_px));
-
-    $stage_style = sprintf(
-        'position:absolute;top:50%%;left:50%%;width:%1$.2fpx;height:%2$.2fpx;transform-origin:top left;transform:translate(-50%%,-50%%) scale(%3$.4f);',
-        $total_width_px,
-        $total_height_px,
-        $stage_scale
-    );
-
-    $wrapper_style = sprintf(
-        'position:relative;width:%1$.2fpx;height:%2$.2fpx;',
-        $total_width_px,
-        $total_height_px
-    );
-
-    $html  = '<div class="archive-card-preview">';
-    $html .= '<div class="archive-preview-root" style="' . $root_style . '">';
-    $html .= '<div class="archive-preview-stage" style="' . $stage_style . '">';
-    $html .= '<div class="archive-preview-wrapper" style="' . $wrapper_style . '">';
-    $html .= '<div class="archive-preview-page ' . $layout_class . '" style="' . $page_style . '"';
-    $html .= ' data-highlight="' . htmlspecialchars($highlight, ENT_QUOTES, 'UTF-8') . '"';
-    $html .= ' data-box="' . htmlspecialchars($styles['color_box'] ?? '#f4f6f8', ENT_QUOTES, 'UTF-8') . '">';
-    $html .= $slide_table;
-    $html .= '</div></div></div></div></div>';
+    $html  = '<div class="archive-card-preview" style="background-color:' . $box_color . ';">';
+    $html .= $bg_layer;
+    $html .= '<div class="archive-preview-overlay"></div>';
+    $html .= '<div class="archive-preview-text">';
+    $html .= '<h4 style="color:' . $title_color . ';font-family:' . htmlspecialchars($font_title, ENT_QUOTES, 'UTF-8') . ';">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</h4>';
+    if ($subtitle !== '') {
+        $html .= '<p style="color:' . $text_color . ';font-family:' . htmlspecialchars($font_text, ENT_QUOTES, 'UTF-8') . ';">' . htmlspecialchars(inanna_truncate_text($subtitle, 100), ENT_QUOTES, 'UTF-8') . '</p>';
+    }
+    $html .= '</div>';
+    $html .= '</div>';
 
     return $html;
 }
@@ -577,14 +479,14 @@ if (is_logged_in()) {
     <style>
         /* --- Base & Typography --- */
         :root {
-            --font-title: <?php echo $styles['font_title'] ?? 'Gabarito, sans-serif'; ?>;
-            --font-text: <?php echo $styles['font_text'] ?? 'Noto Sans, sans-serif'; ?>;
+            --font-title: 'Gabarito', sans-serif;
+            --font-text: 'Noto Sans', sans-serif;
             --interface-font: 'Gabarito', sans-serif;
-            --color-title: <?php echo $styles['color_title'] ?? '#1b8eed'; ?>;
-            --color-highlight: <?php echo $styles['color_highlight'] ?? '#ea2f28'; ?>;
-            --color-text: <?php echo $styles['color_text'] ?? '#2f2f2f'; ?>;
-            --color-bg: <?php echo $styles['color_bg'] ?? '#ffffff'; ?>;
-            --color-box: <?php echo $styles['color_box'] ?? '#f4f6f8'; ?>;
+            --color-title: #1b8eed;
+            --color-highlight: #ea2f28;
+            --color-text: #2f2f2f;
+            --color-bg: #ffffff;
+            --color-box: #f4f6f8;
         }
         body { 
             font-family: var(--interface-font);
@@ -728,30 +630,13 @@ if (is_logged_in()) {
         .archive-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 18px; }
         .archive-card { border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; padding: 18px; background: #fff; box-shadow: 0 12px 30px rgba(0,0,0,0.06); display: grid; grid-template-columns: minmax(240px, 260px) 1fr; grid-template-rows: auto auto; grid-template-areas: "thumb meta" "thumb actions"; gap: 18px; align-items: flex-start; }
         .archive-card-thumb { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); width: 100%; display: flex; flex-direction: column; grid-area: thumb; }
-        .archive-card-preview { position: relative; width: 100%; padding-bottom: 70.714%; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.6); overflow: hidden; }
-        .archive-card-preview > * { position: absolute; inset: 0; }
-        .archive-preview-root { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; overflow: hidden; }
-        .archive-preview-stage { position: relative; display: flex; align-items: flex-start; justify-content: flex-start; transform-origin: top left; }
-        .archive-preview-wrapper { position: relative; }
-        .archive-preview-page { box-sizing: border-box; position: relative; overflow: visible; line-height: 1.45; font-family: var(--archive-font-text, 'Gabarito', sans-serif); }
-        .archive-preview-page.layout-a .archive-preview-table { height: 100%; }
-        .archive-preview-page h1, .archive-preview-page h2, .archive-preview-page h3, .archive-preview-page h4, .archive-preview-page h5, .archive-preview-page h6 { margin: 0; line-height: 1.15; font-weight: 700; font-family: var(--archive-font-title, 'Gabarito', sans-serif); }
-        .archive-preview-page blockquote { margin: 0.8em 0; padding: 1em; border-left: 5px solid var(--archive-highlight, #ea2f28); background-color: var(--archive-box, #f4f6f8); }
-        .archive-preview-table { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
-        .archive-preview-cell { padding: 0; vertical-align: middle; height: 100%; }
-        .archive-preview-content { margin: 0; height: 100%; display: table; width: 100%; box-sizing: border-box; padding: 0 7.56px 0 26.31px; }
-        .archive-preview-content-inner { display: table-cell; vertical-align: middle; height: 100%; }
-        .archive-preview-content.centered .archive-preview-content-inner > div { text-align: center; }
-        .archive-preview-content ul, .archive-preview-content ol { margin: 0.35em 0; padding-left: 0; list-style: none; text-align: left; }
-        .archive-preview-content li { position: relative; padding-left: 1.3em; }
-        .archive-preview-content ul li::before { content: '•'; position: absolute; left: 0; top: 0.1em; font-weight: 700; color: var(--archive-highlight, #ea2f28); font-family: var(--archive-font-title, 'Gabarito', sans-serif); }
-        .archive-preview-content ol { counter-reset: archiveOrdered; }
-        .archive-preview-content ol li { counter-increment: archiveOrdered; }
-        .archive-preview-content ol li::before { content: counter(archiveOrdered) '.'; position: absolute; left: 0; top: 0.05em; font-weight: 700; color: var(--archive-highlight, #ea2f28); font-family: var(--archive-font-title, 'Gabarito', sans-serif); }
-        .archive-preview-media { width: 100%; height: 100%; border-radius: 18px; background-position: center; background-repeat: no-repeat; background-size: cover; display: flex; align-items: center; justify-content: center; text-align: center; }
-        .archive-preview-media.placeholder { border: 2px dashed rgba(0,0,0,0.15); color: #666; background-color: rgba(255,255,255,0.7); font-weight: 600; font-size: 13.92pt; padding: 26.31px; }
-        .archive-preview-media.square { width: 80%; aspect-ratio: 1 / 1; margin: 0 auto; }
-        .archive-preview-square-wrapper { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; }
+        .archive-card-preview { position: relative; width: 100%; padding-bottom: 70.714%; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; background: rgba(0,0,0,0.05); }
+        .archive-preview-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.9); }
+        .archive-preview-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.15), rgba(0,0,0,0.45)); }
+        .archive-preview-text { position: absolute; inset: auto 0 0 0; padding: 18px; display: flex; flex-direction: column; gap: 6px; background: linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0)); }
+        .archive-preview-text h4 { margin: 0; font-size: 1.1rem; color: #fff; }
+        .archive-preview-text p { margin: 0; font-size: 0.85rem; color: rgba(255,255,255,0.85); }
+        .archive-preview-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(0,0,0,0.5); font-weight: 600; }
         .archive-card-ping { position: absolute; top: 14px; right: 16px; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 0 6px rgba(255,255,255,0.65); z-index: 2; }
         .archive-card-meta { display: flex; flex-direction: column; gap: 6px; grid-area: meta; min-width: 0; }
         .archive-card-name { font-weight: 600; color: #222; word-break: break-word; }
