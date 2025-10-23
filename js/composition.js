@@ -2,6 +2,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const compositionTab = document.querySelector('div[onclick*="Composicion"]');
     if (!compositionTab) return;
 
+    const getSlideKey = (markdown) => {
+        if (!markdown) { return ''; }
+        const lines = String(markdown).split(/\r?\n/);
+        for (let line of lines) {
+            const trimmed = line.trim();
+            if (trimmed) {
+                return trimmed.toLowerCase();
+            }
+        }
+        return '';
+    };
+
+    const escapeHtml = (str) => String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    const applyInlineFormatting = (text) => {
+        let escaped = escapeHtml(text);
+        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        escaped = escaped.replace(/__(.+?)__/g, '<strong>$1</strong>');
+        escaped = escaped.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        escaped = escaped.replace(/_(.+?)_/g, '<em>$1</em>');
+        escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+        return escaped;
+    };
+
     // --- STATE ---
     let presentationData = [];
     let currentSlideIndex = 0;
@@ -27,13 +56,81 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('parse_markdown.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin'
             });
+            if (!response.ok) {
+                console.warn('parse_markdown.php returned status', response.status);
+                return renderMarkdownFallback(markdown);
+            }
             return await response.text();
         } catch (error) {
             console.error('Error parsing markdown:', error);
-            return '<p>Error al cargar contenido</p>';
+            return renderMarkdownFallback(markdown);
         }
+    };
+
+    const renderMarkdownFallback = (markdown) => {
+        if (!markdown) {
+            return '<p></p>';
+        }
+        const lines = markdown.split(/\r?\n/);
+        const html = [];
+        let inList = false;
+        let listType = null;
+
+        const closeList = () => {
+            if (inList) {
+                html.push(listType === 'ol' ? '</ol>' : '</ul>');
+                inList = false;
+                listType = null;
+            }
+        };
+
+        lines.forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed) {
+                closeList();
+                return;
+            }
+            const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+            if (headingMatch) {
+                closeList();
+                const level = headingMatch[1].length;
+                const content = escapeHtml(headingMatch[2]);
+                html.push(`<h${level}>${content}</h${level}>`);
+                return;
+            }
+            const listMatch = trimmed.match(/^([-*])\s+(.*)$/);
+            if (listMatch) {
+                const type = 'ul';
+                if (!inList || listType !== type) {
+                    closeList();
+                    html.push('<ul>');
+                    inList = true;
+                    listType = type;
+                }
+                html.push(`<li>${applyInlineFormatting(listMatch[2])}</li>`);
+                return;
+            }
+            const orderedMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+            if (orderedMatch) {
+                const type = 'ol';
+                if (!inList || listType !== type) {
+                    closeList();
+                    html.push('<ol>');
+                    inList = true;
+                    listType = type;
+                }
+                html.push(`<li>${applyInlineFormatting(orderedMatch[2])}</li>`);
+                return;
+            }
+            closeList();
+            html.push(`<p>${applyInlineFormatting(trimmed)}</p>`);
+        });
+
+        closeList();
+        return html.join('\n');
     };
 
     const renderPreview = async () => {
@@ -439,22 +536,55 @@ document.addEventListener('DOMContentLoaded', () => {
             const slides = md.split('---').map(s => s.trim()).filter(s => s);
             console.log('Parsed slides from textarea:', slides);
 
-            // Preserve existing data if markdown hasn't changed drastically
-            presentationData = slides.map((slideMd, index) => {
-                return {
-                    markdown: slideMd,
-                    template: presentationData[index]?.template || 'a',
-                    image: presentationData[index]?.image || null
-                };
-            });
+            const previousData = presentationData.slice();
+            const result = [];
+            let oldIndex = 0;
+
+            for (let newIndex = 0; newIndex < slides.length; newIndex++) {
+                const newMarkdown = slides[newIndex];
+                let matched = false;
+
+                while (oldIndex < previousData.length) {
+                    const currentOld = previousData[oldIndex];
+
+                    if (currentOld.markdown === newMarkdown) {
+                        result.push({
+                            markdown: newMarkdown,
+                            template: currentOld.template || 'a',
+                            image: currentOld.image || null
+                        });
+                        oldIndex++;
+                        matched = true;
+                        break;
+                    }
+
+                    const nextOld = previousData[oldIndex + 1];
+                    if (nextOld && nextOld.markdown === newMarkdown) {
+                        oldIndex++;
+                        continue;
+                    }
+                    break;
+                }
+
+                if (!matched) {
+                    result.push({
+                        markdown: newMarkdown,
+                        template: 'a',
+                        image: null
+                    });
+                }
+            }
+
+            presentationData = result;
         }
-        
+
         currentSlideIndex = Math.min(currentSlideIndex, presentationData.length - 1);
         if(presentationData.length === 0) currentSlideIndex = 0;
 
         renderThumbnails();
         renderPreview();
     };
+    window.__inannaInitComposition = initCompositionView;
 
     // --- EVENT LISTENERS ---
 
@@ -529,12 +659,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SAVE PRESENTATION LOGIC ---
     const saveButtons = document.querySelectorAll('.save-presentation-btn');
+    const currentEditName = document.body.dataset.currentEdit || '';
+    const recordedFiles = Array.isArray(window.__inannaRecordedFiles) ? window.__inannaRecordedFiles : [];
+    const recordedSet = new Set(recordedFiles.map(name => name.toLowerCase()));
+
+    const suggestDefaultFilename = () => {
+        if (currentEditName) {
+            return currentEditName;
+        }
+        const exists = (name) => recordedSet.has(String(name).toLowerCase());
+        let counter = 0;
+        while (true) {
+            const candidate = counter === 0 ? 'presentacion.xml' : `presentacion-${counter}.xml`;
+            if (!exists(candidate)) {
+                return candidate;
+            }
+            counter += 1;
+        }
+    };
 
     const handleSavePresentation = async () => {
         // Ensure data reflects current markdown/template selections
         initCompositionView();
 
-        let filename = prompt("Guardar como...", "presentacion.xml");
+        let filename = prompt("Guardar como...", suggestDefaultFilename());
         if (!filename) { return; }
 
         if (!filename.endsWith('.xml')) {
@@ -579,4 +727,9 @@ document.addEventListener('DOMContentLoaded', () => {
     saveButtons.forEach((btn) => {
         btn.addEventListener('click', handleSavePresentation);
     });
+
+    const composicionTabContent = document.getElementById('Composicion');
+    if (composicionTabContent && composicionTabContent.classList.contains('active')) {
+        initCompositionView();
+    }
 });

@@ -165,8 +165,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-
 // --- Data Handling for Logged-in user ---
+$current_edit_param = $_SESSION['current_edit_file'] ?? '';
 if (is_logged_in()) {
     // --- DATA HANDLING DEFINES ---
     define('STYLES_FILE', __DIR__ . '/data/styles.json');
@@ -196,11 +196,15 @@ if (is_logged_in()) {
 
     // --- Presentation Loading Logic ---
     $loaded_presentation_data = null;
-    $current_edit_param = '';
+    if (isset($_GET['new'])) {
+        unset($_SESSION['current_edit_file']);
+        $current_edit_param = '';
+    }
     if (isset($_GET['edit'])) {
         error_log("DEBUG: Edit parameter received: " . $_GET['edit']);
         $filename = basename($_GET['edit']); // Sanitize filename
         $current_edit_param = $filename;
+        $_SESSION['current_edit_file'] = $filename;
         $file_path = __DIR__ . '/data/archivo/' . $filename;
         error_log("DEBUG: Attempting to load file: " . $file_path);
 
@@ -241,6 +245,10 @@ if (is_logged_in()) {
         } else {
             error_log("ERROR: File does not exist: " . $file_path);
         }
+    }
+
+    if ($current_edit_param === '' && isset($_SESSION['current_edit_file'])) {
+        $current_edit_param = basename($_SESSION['current_edit_file']);
     }
 
     // If a presentation was loaded, update the $styles variable
@@ -662,9 +670,12 @@ if (is_logged_in()) {
         }
     </style>
 </head>
-<body>
+<body<?php echo $current_edit_param ? ' data-current-edit="' . htmlspecialchars($current_edit_param, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>>
 
 <?php if (is_logged_in()): ?>
+    <script>
+        window.__inannaRecordedFiles = <?php echo json_encode(array_values(array_map(function ($p) { return $p['file']; }, $presentations))); ?>;
+    </script>
     <script>
         const appStyles = <?php echo json_encode($styles); ?>;
         const initialPresentationData = <?php echo json_encode($loaded_presentation_data); ?>;
@@ -672,9 +683,14 @@ if (is_logged_in()) {
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <img src="inanna.png" alt="Inanna Logo" style="height: 50px; display: block; margin-bottom: 10px;">
-            <form method="POST" action="inanna.php">
-                <button type="submit" name="logout" class="logout-btn">Salir</button>
-            </form>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <form method="GET" action="inanna.php" style="margin: 0;">
+                    <button type="submit" name="new" value="1" class="logout-btn" style="padding: 8px 15px;">Nueva Presentación</button>
+                </form>
+                <form method="POST" action="inanna.php" style="margin: 0;">
+                    <button type="submit" name="logout" class="logout-btn">Salir</button>
+                </form>
+            </div>
         </div>
 
         <div class="tabs">
@@ -1108,6 +1124,9 @@ function openTab(evt, tabName) {
     }
     if (evt && evt.currentTarget) {
         evt.currentTarget.className += " active";
+    }
+    if (tabName === 'Composicion' && typeof window.__inannaInitComposition === 'function') {
+        window.__inannaInitComposition();
     }
     if (typeof history.replaceState === 'function' && typeof URL === 'function') {
         var url = new URL(window.location);
