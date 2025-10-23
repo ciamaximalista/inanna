@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 page-break-inside: avoid;
                 break-inside: avoid;
             }
+            .slide-fullscreen-cell { padding: 0; }
             .slide-content ul,
             .slide-content ol {
                 margin: 0.35em 0;
@@ -199,6 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .slide-page a { color: ${appStyles.color_highlight}; text-decoration: none; }
             .slide-page strong,
             .slide-page b { color: ${appStyles.color_highlight}; font-weight: 700; }
+            .slide-page.layout-fullscreen { padding: 0; }
+            .slide-page.layout-fullscreen .slide-table { height: 100%; }
+            .slide-page.layout-fullscreen .slide-cell { padding: 0; }
             .slide-page blockquote {
                 background-color: ${appStyles.color_box};
                 padding: 1em;
@@ -207,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 text-align: left;
                 font-size: 20pt;
             }
-           .slide-media {
+            .slide-media {
                 width: 100%;
                 height: 100%;
                 border-radius: 18px;
@@ -222,6 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 justify-content: center;
                 color: #555;
                 text-align: center;
+            }
+            .slide-media.fullscreen {
+                border-radius: 0;
             }
             .slide-media.placeholder {
                 border: 2px dashed #d0d0d0;
@@ -256,17 +263,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         </style>`;
 
-        const layoutClassMap = {
-            a: 'layout-a',
-            z: 'layout-z',
-            y: 'layout-y',
-            g: 'layout-g',
-            h: 'layout-h',
-            b: 'layout-b',
-            c: 'layout-c',
-            e: 'layout-e',
+       const layoutClassMap = {
+           a: 'layout-a',
+           z: 'layout-z',
+           y: 'layout-y',
+           g: 'layout-g',
+           h: 'layout-h',
+           b: 'layout-b',
+           c: 'layout-c',
+           e: 'layout-e',
             f: 'layout-f',
-        };
+            fullscreen: 'layout-fullscreen',
+       };
 
         const layoutClass = layoutClassMap[template] || 'layout-a';
         const contentClass = template === 'a' ? 'slide-content centered' : 'slide-content';
@@ -275,7 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const requiresSquareMedia = template === 'g' || template === 'h';
         let mediaBlock = '';
         if (template !== 'a') {
-            const mediaBaseClass = requiresSquareMedia ? 'slide-media square' : 'slide-media';
+            let mediaBaseClass = requiresSquareMedia ? 'slide-media square' : 'slide-media';
+            if (template === 'fullscreen') {
+                mediaBaseClass = 'slide-media fullscreen';
+            }
             const hasImage = Boolean(imageSrc);
             if (hasImage) {
                 const escaped = imageSrc.replace(/(["'\\])/g, '\\$1');
@@ -285,8 +296,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        let pageInlineStyle = '';
         let slideTable = '';
         switch (template) {
+            case 'fullscreen':
+                pageInlineStyle = 'padding:0;';
+                slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-fullscreen-cell">${mediaBlock}</td></tr></table>`;
+                break;
             case 'z':
                 {
                     let leftCell = contentBlock;
@@ -364,7 +380,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
 
-        const slideHtml = `<div class="slide-wrapper"><div class="slide-page ${layoutClass}">${slideTable}</div></div>`;
+        const pageStyleAttr = pageInlineStyle ? ' style="' + pageInlineStyle + '"' : '';
+        const slideHtml = `<div class="slide-wrapper"><div class="slide-page ${layoutClass}"${pageStyleAttr}>${slideTable}</div></div>`;
         finalHtml += `<div class="preview-root"><div class="preview-stage">${slideHtml}</div></div>`;
 
         previewContainer.innerHTML = finalHtml;

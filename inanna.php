@@ -102,21 +102,12 @@ function inanna_render_slide_preview($slide, $styles) {
     }
 
     $title = '';
-    $subtitle = '';
-
     if (preg_match('/<h1[^>]*>(.*?)<\/h1>/i', $markdown_html, $matches)) {
         $title = trim(strip_tags($matches[1]));
     }
     if ($title === '' && preg_match('/<h2[^>]*>(.*?)<\/h2>/i', $markdown_html, $matches)) {
         $title = trim(strip_tags($matches[1]));
     }
-    if (preg_match('/<h2[^>]*>(.*?)<\/h2>/i', $markdown_html, $matches)) {
-        $subtitle = trim(strip_tags($matches[1]));
-    }
-    if ($subtitle === '' && preg_match('/<p[^>]*>(.*?)<\/p>/i', $markdown_html, $matches)) {
-        $subtitle = trim(strip_tags($matches[1]));
-    }
-
     if ($title === '') {
         $title = 'Presentación sin título';
     }
@@ -978,6 +969,7 @@ if (is_logged_in()) {
                     <div id="slide-preview" style="width: 100%; height: 0; padding-bottom: 70.71428%; margin-bottom: 20px; position: relative;"></div>
                     <h4>Plantillas para la diapositiva actual</h4>
                     <div id="template-selector" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
+                        <div class="template-option" data-template="fullscreen" title="Imagen a toda pantalla"><div style="border:1px solid #333; height: 80px; display:flex; align-items:center; justify-content:center; background:#ccc; color:#333; font-size:0.8rem; gap:4px;"><span style="font-size:0.7rem;">IMG</span><span style="font-size:0.7rem; color:#666;">100%</span></div></div>
                         <div class="template-option" data-template="a" title="Título 1: Centrado"><div style="border:1px solid #333; height: 80px; display:flex; align-items:center; justify-content:center; flex-direction:column;">T</div></div>
                         <div class="template-option" data-template="z" title="Título 2: Título a la izquierda, imagen a la derecha"><div style="border:1px solid #333; height: 80px; display:flex;"><div style="width:50%; display:flex; align-items:center; justify-content:center;">T</div><div style="width:50%; background:#ccc; display:flex; align-items:center; justify-content:center;">IMG</div></div></div>
                         <div class="template-option" data-template="y" title="Título 3: Título a la derecha, imagen a la izquierda"><div style="border:1px solid #333; height: 80px; display:flex;"><div style="width:50%; background:#ccc; display:flex; align-items:center; justify-content:center;">IMG</div><div style="width:50%; display:flex; align-items:center; justify-content:center;">T</div></div></div>
