@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let imageOriginalHeight = 0;
     let displayScale = 1;
     let isDrawing = false;
-    let drawStart = null;
+    let drawStartImage = null;
     let updatingInputs = false;
     const selection = { x: 0, y: 0, width: 0, height: 0 };
 
@@ -91,6 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const canvasHeight = Math.max(1, Math.round(imageOriginalHeight * scale));
         editCanvas.width = canvasWidth;
         editCanvas.height = canvasHeight;
+        editCanvas.style.width = `${canvasWidth}px`;
+        editCanvas.style.height = `${canvasHeight}px`;
 
         const brightnessFactor = (100 + brightness) / 100;
         const contrastFactor = (100 + contrast) / 100;
@@ -129,20 +131,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getCanvasCoordinates = (event) => {
         const rect = editCanvas.getBoundingClientRect();
-        const x = clamp(event.clientX - rect.left, 0, editCanvas.width);
-        const y = clamp(event.clientY - rect.top, 0, editCanvas.height);
+        const scaleX = editCanvas.width / rect.width;
+        const scaleY = editCanvas.height / rect.height;
+        const x = clamp((event.clientX - rect.left) * scaleX, 0, editCanvas.width);
+        const y = clamp((event.clientY - rect.top) * scaleY, 0, editCanvas.height);
         return { x, y };
     };
 
-    const applySelectionFromCanvasRect = (canvasRect) => {
-        const xImage = canvasRect.x / displayScale;
-        const yImage = canvasRect.y / displayScale;
-        const widthImage = canvasRect.width / displayScale;
-        const heightImage = canvasRect.height / displayScale;
-        selection.x = clamp(Math.round(xImage), 0, imageOriginalWidth - 1);
-        selection.y = clamp(Math.round(yImage), 0, imageOriginalHeight - 1);
-        selection.width = clamp(Math.round(widthImage), 1, imageOriginalWidth - selection.x);
-        selection.height = clamp(Math.round(heightImage), 1, imageOriginalHeight - selection.y);
+    const updateSelectionFromDrag = (canvasPoint) => {
+        if (!drawStartImage) { return; }
+        const currentImageX = clamp(canvasPoint.x / displayScale, 0, imageOriginalWidth);
+        const currentImageY = clamp(canvasPoint.y / displayScale, 0, imageOriginalHeight);
+        const startImageX = clamp(drawStartImage.x, 0, imageOriginalWidth);
+        const startImageY = clamp(drawStartImage.y, 0, imageOriginalHeight);
+
+        const minX = Math.max(0, Math.min(startImageX, currentImageX));
+        const minY = Math.max(0, Math.min(startImageY, currentImageY));
+        const maxX = Math.min(imageOriginalWidth, Math.max(startImageX, currentImageX));
+        const maxY = Math.min(imageOriginalHeight, Math.max(startImageY, currentImageY));
+
+        selection.x = Math.round(minX);
+        selection.y = Math.round(minY);
+        selection.width = Math.max(1, Math.round(maxX - minX));
+        selection.height = Math.max(1, Math.round(maxY - minY));
+        clampSelection();
         updateInputsFromSelection();
         drawPreview();
     };
@@ -219,43 +231,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (editCanvas) {
-        editCanvas.addEventListener('mousedown', (event) => {
-            if (!currentImage) { return; }
-            isDrawing = true;
-            drawStart = getCanvasCoordinates(event);
-        });
-
-        editCanvas.addEventListener('mousemove', (event) => {
-        if (!isDrawing || !currentImage) { return; }
-        const current = getCanvasCoordinates(event);
-        const rect = {
-            x: Math.min(drawStart.x, current.x),
-            y: Math.min(drawStart.y, current.y),
-            width: Math.abs(current.x - drawStart.x),
-            height: Math.abs(current.y - drawStart.y),
+        const handlePointerMove = (event) => {
+            if (!isDrawing || !currentImage) { return; }
+            event.preventDefault();
+            const current = getCanvasCoordinates(event);
+            updateSelectionFromDrag(current);
         };
-        applySelectionFromCanvasRect(rect);
-        });
 
         const finishDrawing = (event) => {
             if (!isDrawing || !currentImage) { return; }
+            event.preventDefault();
             isDrawing = false;
             const current = getCanvasCoordinates(event);
-            const rect = {
-                x: Math.min(drawStart.x, current.x),
-                y: Math.min(drawStart.y, current.y),
-                width: Math.max(1, Math.abs(current.x - drawStart.x)),
-                height: Math.max(1, Math.abs(current.y - drawStart.y)),
-            };
-            applySelectionFromCanvasRect(rect);
+            updateSelectionFromDrag(current);
+            drawStartImage = null;
+            window.removeEventListener('mousemove', handlePointerMove);
+            window.removeEventListener('mouseup', finishDrawing);
         };
 
-        editCanvas.addEventListener('mouseup', finishDrawing);
-        editCanvas.addEventListener('mouseleave', (event) => {
-            if (isDrawing) {
-            finishDrawing(event);
-        }
-    });
+        editCanvas.addEventListener('mousedown', (event) => {
+            if (!currentImage) { return; }
+            event.preventDefault();
+            isDrawing = true;
+            const canvasPoint = getCanvasCoordinates(event);
+            drawStartImage = {
+                x: canvasPoint.x / displayScale,
+                y: canvasPoint.y / displayScale,
+            };
+            updateSelectionFromDrag(canvasPoint);
+            window.addEventListener('mousemove', handlePointerMove);
+            window.addEventListener('mouseup', finishDrawing);
+        });
     }
 
     editButtons.forEach((btn) => {

@@ -511,12 +511,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- SAVE PRESENTATION LOGIC ---
-    const saveBtn = document.getElementById('save-presentation');
-    saveBtn.addEventListener('click', async () => {
-        let filename = prompt("Guardar como...", "presentacion.xml");
-        if (!filename) return; // User cancelled
+    const saveButtons = document.querySelectorAll('.save-presentation-btn');
 
-        // Basic filename validation
+    const handleSavePresentation = async () => {
+        // Ensure data reflects current markdown/template selections
+        initCompositionView();
+
+        let filename = prompt("Guardar como...", "presentacion.xml");
+        if (!filename) { return; }
+
         if (!filename.endsWith('.xml')) {
             filename += '.xml';
         }
@@ -526,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const dataToSave = {
-            filename: filename,
+            filename,
             presentation_data: {
                 slides: presentationData,
                 styles: appStyles
@@ -546,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok && result.status === 'success') {
                 alert(result.message);
-                window.location.reload(); // Reload to show the new file in the Archive tab
+                window.location.href = 'inanna.php?tab=Archivo';
             } else {
                 alert(`Error al guardar: ${result.message}`);
             }
@@ -554,5 +557,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error saving presentation:', error);
             alert('Ocurrió un error de red al intentar guardar la presentación.');
         }
+    };
+
+    saveButtons.forEach((btn) => {
+        btn.addEventListener('click', handleSavePresentation);
     });
 });
