@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inanna - Diseñador de Presentaciones Panorámicas</title>
+    <meta name="description" content="Inanna convierte tu Markdown en presentaciones panorámicas con estilos personalizables, banco de recursos multimedia y exportación a PDF.">
+    <meta property="og:title" content="Inanna">
+    <meta property="og:description" content="Crea presentaciones panorámicas en minutos a partir de Markdown, con estilos editables y exportación a PDF.">
+    <meta property="og:image" content="inanna-banner.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Inanna">
+    <meta name="twitter:description" content="Crea presentaciones panorámicas en minutos a partir de Markdown, con estilos editables y exportación a PDF.">
+    <meta name="twitter:image" content="inanna-banner.png">
+    <link rel="icon" href="inanna.png" type="image/png">
+    <style>
+        :root {
+            --font-headline: 'Poppins', 'Segoe UI', 'Helvetica Neue', sans-serif;
+            --font-body: 'Lato', 'Segoe UI', 'Helvetica Neue', sans-serif;
+            --text-color: #2f2f2f;
+            --bg-color: #f7f8fa;
+            --border-color: #e0e3e9;
+            --accent-color: #1b8eed;
+            --accent-contrast: #ea2f28;
+            --card-bg: #ffffff;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: var(--font-body);
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2em;
+        }
+        header {
+            text-align: center;
+            padding: 3em 1.5em;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(180deg, #ffffff 0%, #f3f7fd 100%);
+        }
+        header img {
+            max-width: 220px;
+            width: 40vw;
+            height: auto;
+            margin-bottom: 1.2em;
+        }
+        header h1 {
+            font-family: var(--font-headline);
+            font-size: 2.6em;
+            margin: 0 0 0.6em;
+            color: var(--accent-color);
+        }
+        header p {
+            font-size: 1.15em;
+            color: #505762;
+            margin: 0.8em 0;
+        }
+        .teaser-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.8em;
+            margin: 2em auto;
+            max-width: 760px;
+            box-shadow: 0 8px 20px rgba(27, 142, 237, 0.08);
+            text-align: left;
+        }
+        .teaser-box p {
+            font-size: 1.1em;
+            color: #40464f;
+            margin: 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #ffffff;
+            padding: 0.85em 1.8em;
+            border-radius: 6px;
+            text-decoration: none;
+            font-family: var(--font-headline);
+            font-size: 1.1em;
+            margin-top: 1.5em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .cta-button:hover {
+            background-color: #156bb1;
+            transform: translateY(-2px);
+        }
+        .cta-button:active {
+            transform: translateY(0);
+        }
+        .features {
+            padding: 3em 0;
+        }
+        .features h2 {
+            text-align: center;
+            font-family: var(--font-headline);
+            font-size: 2.4em;
+            margin-bottom: 1.4em;
+            color: #1d2735;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2em;
+        }
+        .feature-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.6em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .feature-card h3 {
+            font-family: var(--font-headline);
+            margin-top: 0;
+            margin-bottom: 0.6em;
+            color: var(--accent-color);
+            font-size: 1.3em;
+        }
+        .feature-card p {
+            margin: 0;
+            color: #505762;
+        }
+        .feature-card strong {
+            color: var(--accent-contrast);
+        }
+        .eupl-logo {
+            float: right;
+            width: 90px;
+            height: auto;
+            margin-left: 12px;
+            margin-top: 4px;
+        }
+        footer {
+            text-align: center;
+            padding: 2.2em 1.5em;
+            margin-top: 2.5em;
+            border-top: 1px solid var(--border-color);
+            background-color: #ffffff;
+        }
+        .license-box {
+            display: inline-block;
+            border: 1px solid var(--border-color);
+            padding: 1.8em 2.2em;
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            max-width: 540px;
+        }
+        .license-box p {
+            margin: 0.6em 0;
+            font-size: 0.95em;
+            color: #40464f;
+        }
+        .license-box a {
+            color: inherit;
+            text-decoration: underline;
+        }
+        .license-box img {
+            vertical-align: middle;
+            height: 34px;
+            width: auto;
+            margin-left: 0.6em;
+        }
+        .github-link svg {
+            vertical-align: middle;
+            margin-right: 0.4em;
+        }
+        @media (max-width: 640px) {
+            header h1 {
+                font-size: 2.2em;
+            }
+            .teaser-box {
+                padding: 1.4em;
+            }
+            .license-box {
+                padding: 1.5em;
+            }
+            .license-box img {
+                display: block;
+                margin: 0.8em auto 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="inanna.png" alt="Logo de Inanna">
+        <div class="teaser-box">
+            <h1>Presentaciones panorámicas desde tu Markdown</h1>
+            <p>Inanna transforma textos en Markdown en presentaciones amplias listas para proyectar o imprimir. Controla la tipografía, los colores y la composición con plantillas diseñadas para narrativas visuales extensas, añade recursos multimedia, ajusta imágenes sobre la marcha y exporta a PDF conservando tu estilo de marca.</p>
+        </div>
+        <p style="font-size:0.9em;">Desarrollado dentro del proyecto <a href="https://ruralnext.org" target="_blank" rel="noopener">RuralNEXT</a> de <a href="https://repoblacion.ong" target="_blank" rel="noopener">Fundación Repoblación</a>, por <a href="https://maximalista.com" target="_blank" rel="noopener">Compañía Maximalista S.Coop.</a></p>
+        <a href="inanna.php" class="cta-button">Acceder a la aplicación</a>
+    </header>
+
+    <main class="container">
+        <section class="features">
+            <h2>Funcionalidades</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Editor Markdown</h3>
+                    <p>Escribe en texto plano, separa diapositivas con <strong>---</strong> y obtén previsualizaciones instantáneas gracias a Parsedown. Guarda versiones en XML para reeditarlas siempre que quieras.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Plantillas panorámicas</h3>
+                    <p>Selecciona plantillas pensadas para pantallas anchas y combina contenidos con imágenes de forma equilibrada mediante un sistema de miniaturas y arrastrar y soltar.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Estilos personalizables</h3>
+                    <p>Define fuentes, colores y cajas destacadas para cada proyecto. Sincroniza con Google Fonts y conserva la identidad visual de tu organización.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Banco de recursos</h3>
+                    <p>Sube imágenes y vídeos, recórtalos y ajusta brillo o contraste antes de insertarlos en tus diapositivas. Gestiona todo desde un único panel.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Exportación a PDF</h3>
+                    <p>Genera PDFs panorámicos con <strong>wkhtmltopdf</strong>, incrustando fuentes y recursos para obtener resultados fieles a tu diseño original.</p>
+                </div>
+                <div class="feature-card">
+                    <img src="EUPL-logo-04.png" alt="Logo EUPL" class="eupl-logo">
+                    <h3>Software libre</h3>
+                    <p>Distribuido bajo la licencia <a href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank" rel="noopener">EUPL v1.2</a> para que puedas usarlo, estudiarlo, modificarlo y compartirlo.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="license-box">
+            <p>Inanna es software libre bajo <a href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank" rel="noopener">licencia EUPL v1.2</a></p>
+            <p>Creado por <a href="https://maximalista.com" target="_blank" rel="noopener">Compañía Maximalista S.Coop.<img src="maximalista.png" alt="Logo Maximalista"></a></p>
+            <p>
+                <a class="github-link" href="https://github.com/ciamaximalista/inanna" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+                    </svg>
+                    Ver el código en GitHub
+                </a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
