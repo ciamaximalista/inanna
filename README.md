@@ -14,7 +14,7 @@ Inanna es un entorno web para construir presentaciones panorámicas a partir de 
 
 ## Requisitos previos
 - PHP 8.1 o superior con extensiones `json`, `mbstring`, `gd`, `dom` y `simplexml` habilitadas.
-- Composer para instalar las dependencias (`erusev/parsedown`, `dompdf/dompdf`).
+- Composer para instalar las dependencias (`erusev/parsedown`).
 - Un servidor web (Apache, Nginx, Caddy) o el servidor embebido de PHP (`php -S`).
 - `wkhtmltopdf` 0.12.x o superior disponible en la línea de comandos.
 - Acceso de escritura para el usuario del servidor sobre `data/` y `recursos/`.
@@ -22,7 +22,7 @@ Inanna es un entorno web para construir presentaciones panorámicas a partir de 
 ## Instalación paso a paso
 1. Clona el repositorio y entra al directorio del proyecto:
    ```sh
-   git clone <url-del-repositorio> inanna
+   git clone https://github.com/ciamaximalista/inanna inanna
    cd inanna
    ```
 2. Instala las dependencias de PHP:

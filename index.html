@@ -14,242 +14,187 @@
     <meta name="twitter:description" content="Crea presentaciones panorámicas en minutos a partir de Markdown, con estilos editables y exportación a PDF.">
     <meta name="twitter:image" content="inanna-banner.png">
     <link rel="icon" href="inanna.png" type="image/png">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;600;700&display=swap">
     <style>
         :root {
-            --font-headline: 'Poppins', 'Segoe UI', 'Helvetica Neue', sans-serif;
-            --font-body: 'Lato', 'Segoe UI', 'Helvetica Neue', sans-serif;
-            --text-color: #2f2f2f;
-            --bg-color: #f7f8fa;
-            --border-color: #e0e3e9;
-            --accent-color: #1b8eed;
-            --accent-contrast: #ea2f28;
-            --card-bg: #ffffff;
-        }
-        * {
-            box-sizing: border-box;
+            --font-interface: 'Gabarito', sans-serif;
+            --color-title: #1b8eed;
+            --color-highlight: #ea2f28;
+            --color-text: #2f2f2f;
+            --color-bg: #ffffff;
+            --color-box: #f4f6f8;
         }
         body {
-            font-family: var(--font-body);
-            color: var(--text-color);
-            background-color: var(--bg-color);
+            font-family: var(--font-interface);
             margin: 0;
+            background-color: #f0f2f5;
+            color: var(--color-text);
             line-height: 1.6;
+            text-align: center;
         }
         .container {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 2em;
-        }
-        header {
-            text-align: center;
-            padding: 3em 1.5em;
-            border-bottom: 1px solid var(--border-color);
-            background: linear-gradient(180deg, #ffffff 0%, #f3f7fd 100%);
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--color-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
         header img {
-            max-width: 220px;
-            width: 40vw;
-            height: auto;
-            margin-bottom: 1.2em;
+            height: 160px;
+            margin-bottom: 20px;
         }
-        header h1 {
-            font-family: var(--font-headline);
-            font-size: 2.6em;
-            margin: 0 0 0.6em;
-            color: var(--accent-color);
+        h1 {
+            font-size: 2.8em;
+            color: var(--color-title);
+            font-weight: 700;
+            margin: 0.2em 0 0.5em;
         }
-        header p {
-            font-size: 1.15em;
-            color: #505762;
-            margin: 0.8em 0;
-        }
-        .teaser-box {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.8em;
-            margin: 2em auto;
-            max-width: 760px;
-            box-shadow: 0 8px 20px rgba(27, 142, 237, 0.08);
-            text-align: left;
-        }
-        .teaser-box p {
-            font-size: 1.1em;
-            color: #40464f;
-            margin: 0;
+        .subtitle {
+            font-size: 1.2em;
+            color: #555;
+            max-width: 650px;
+            margin: 0 auto 30px;
         }
         .cta-button {
             display: inline-block;
-            background-color: var(--accent-color);
-            color: #ffffff;
-            padding: 0.85em 1.8em;
-            border-radius: 6px;
+            padding: 15px 35px;
+            border-radius: 8px;
+            background-color: var(--color-title);
+            color: white;
             text-decoration: none;
-            font-family: var(--font-headline);
+            font-weight: 600;
             font-size: 1.1em;
-            margin-top: 1.5em;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
         .cta-button:hover {
-            background-color: #156bb1;
-            transform: translateY(-2px);
+            background-color: var(--color-highlight);
         }
         .cta-button:active {
-            transform: translateY(0);
+            transform: scale(0.98);
+        }
+        .project-info {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 25px;
+        }
+        .project-info a {
+            color: var(--color-text);
         }
         .features {
-            padding: 3em 0;
+            margin-top: 50px;
+            text-align: left;
         }
-        .features h2 {
+        h2 {
             text-align: center;
-            font-family: var(--font-headline);
-            font-size: 2.4em;
-            margin-bottom: 1.4em;
-            color: #1d2735;
+            font-size: 2em;
+            color: var(--color-title);
+            margin-bottom: 30px;
         }
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2em;
+            gap: 25px;
         }
         .feature-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background-color: var(--color-box);
+            padding: 25px;
             border-radius: 10px;
-            padding: 1.6em;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
         }
         .feature-card h3 {
-            font-family: var(--font-headline);
-            margin-top: 0;
-            margin-bottom: 0.6em;
-            color: var(--accent-color);
             font-size: 1.3em;
+            color: var(--color-title);
+            margin: 0 0 10px;
         }
         .feature-card p {
             margin: 0;
-            color: #505762;
-        }
-        .feature-card strong {
-            color: var(--accent-contrast);
-        }
-        .eupl-logo {
-            float: right;
-            width: 90px;
-            height: auto;
-            margin-left: 12px;
-            margin-top: 4px;
+            color: #444;
         }
         footer {
-            text-align: center;
-            padding: 2.2em 1.5em;
-            margin-top: 2.5em;
-            border-top: 1px solid var(--border-color);
-            background-color: #ffffff;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.9em;
+            color: #555;
         }
-        .license-box {
-            display: inline-block;
-            border: 1px solid var(--border-color);
-            padding: 1.8em 2.2em;
-            border-radius: 12px;
-            background-color: var(--card-bg);
-            max-width: 540px;
+        footer img {
+            height: 1.5em;
+            vertical-align: middle;
+            margin: 0 5px;
         }
-        .license-box p {
-            margin: 0.6em 0;
-            font-size: 0.95em;
-            color: #40464f;
+        footer a {
+            color: var(--color-text);
+            text-decoration: none;
         }
-        .license-box a {
-            color: inherit;
+        footer a:hover {
             text-decoration: underline;
-        }
-        .license-box img {
-            vertical-align: middle;
-            height: 34px;
-            width: auto;
-            margin-left: 0.6em;
-        }
-        .github-link svg {
-            vertical-align: middle;
-            margin-right: 0.4em;
-        }
-        @media (max-width: 640px) {
-            header h1 {
-                font-size: 2.2em;
-            }
-            .teaser-box {
-                padding: 1.4em;
-            }
-            .license-box {
-                padding: 1.5em;
-            }
-            .license-box img {
-                display: block;
-                margin: 0.8em auto 0;
-            }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <img src="inanna.png" alt="Logo de Inanna">
-        <div class="teaser-box">
+    <div class="container">
+        <header>
+            <img src="inanna.png" alt="Logo de Inanna">
             <h1>Presentaciones panorámicas desde tu Markdown</h1>
-            <p>Inanna transforma textos en Markdown en presentaciones amplias listas para proyectar o imprimir. Controla la tipografía, los colores y la composición con plantillas diseñadas para narrativas visuales extensas, añade recursos multimedia, ajusta imágenes sobre la marcha y exporta a PDF conservando tu estilo de marca.</p>
-        </div>
-        <p style="font-size:0.9em;">Desarrollado dentro del proyecto <a href="https://ruralnext.org" target="_blank" rel="noopener">RuralNEXT</a> de <a href="https://repoblacion.ong" target="_blank" rel="noopener">Fundación Repoblación</a>, por <a href="https://maximalista.com" target="_blank" rel="noopener">Compañía Maximalista S.Coop.</a></p>
-        <a href="inanna.php" class="cta-button">Acceder a la aplicación</a>
-    </header>
+            <p class="subtitle">
+                Inanna transforma textos en Markdown en presentaciones listas para proyectar o imprimir. Controla la tipografía, los colores y la composición, y exporta a PDF conservando tu estilo de marca.
+            </p>
+            <a href="inanna.php" class="cta-button">Acceder a la aplicación</a>
+            <p class="project-info">
+                Desarrollado para <a href="https://ruralnext.org" target="_blank" rel="noopener">RuralNEXT</a> por <a href="https://maximalista.coop" target="_blank" rel="noopener">Compañía Maximalista S.Coop.</a>.
+            </p>
+        </header>
 
-    <main class="container">
-        <section class="features">
+        <main class="features">
             <h2>Funcionalidades</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <h3>Editor Markdown</h3>
-                    <p>Escribe en texto plano, separa diapositivas con <strong>---</strong> y obtén previsualizaciones instantáneas gracias a Parsedown. Guarda versiones en XML para reeditarlas siempre que quieras.</p>
+                    <p>Escribe en texto plano, separa diapositivas con "---" y obtén previsualizaciones instantáneas. Guarda y recupera tus presentaciones en formato XML.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Plantillas panorámicas</h3>
-                    <p>Selecciona plantillas pensadas para pantallas anchas y combina contenidos con imágenes de forma equilibrada mediante un sistema de miniaturas y arrastrar y soltar.</p>
+                    <h3>Plantillas Flexibles</h3>
+                    <p>Elige entre múltiples plantillas panorámicas para combinar texto e imágenes de forma equilibrada y profesional.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Estilos personalizables</h3>
-                    <p>Define fuentes, colores y cajas destacadas para cada proyecto. Sincroniza con Google Fonts y conserva la identidad visual de tu organización.</p>
+                    <h3>Estilos Personalizables</h3>
+                    <p>Define fuentes (integrado con Google Fonts), colores y estilos. Guarda y carga tus combinaciones de diseño favoritas.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Banco de recursos</h3>
-                    <p>Sube imágenes y vídeos, recórtalos y ajusta brillo o contraste antes de insertarlos en tus diapositivas. Gestiona todo desde un único panel.</p>
+                    <h3>Banco de Recursos</h3>
+                    <p>Sube imágenes y vídeos. Edita tus imágenes con herramientas de recorte, brillo y contraste directamente en la aplicación.</p>
                 </div>
                 <div class="feature-card">
                     <h3>Exportación a PDF</h3>
-                    <p>Genera PDFs panorámicos con <strong>wkhtmltopdf</strong>, incrustando fuentes y recursos para obtener resultados fieles a tu diseño original.</p>
+                    <p>Genera PDFs panorámicos de alta fidelidad con <code>wkhtmltopdf</code>, incrustando fuentes y recursos para un resultado perfecto.</p>
                 </div>
                 <div class="feature-card">
-                    <img src="EUPL-logo-04.png" alt="Logo EUPL" class="eupl-logo">
-                    <h3>Software libre</h3>
-                    <p>Distribuido bajo la licencia <a href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank" rel="noopener">EUPL v1.2</a> para que puedas usarlo, estudiarlo, modificarlo y compartirlo.</p>
+                     <img src="EUPL-logo-04.png" alt="Logo EUPL" style="height:4em; float:right;"/>
+                    <h3>Software Libre</h3>
+                    <p>Distribuido bajo la licencia EUPL v1.2 para que puedas usarlo, estudiarlo, modificarlo y compartirlo libremente.</p>
                 </div>
             </div>
-        </section>
-    </main>
+        </main>
 
-    <footer>
-        <div class="license-box">
-            <p>Inanna es software libre bajo <a href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank" rel="noopener">licencia EUPL v1.2</a></p>
-            <p>Creado por <a href="https://maximalista.com" target="_blank" rel="noopener">Compañía Maximalista S.Coop.<img src="maximalista.png" alt="Logo Maximalista"></a></p>
+        <footer>
+            <p>
+                Inanna es software libre bajo licencia <a href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank" rel="noopener">EUPL v1.2</a><a href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank" rel="noopener"><img src="EUPL-logo-04.png" alt="Logo EUPL" style="height:2.4em; vertical-align: middle; margin: 0 5px;"></a>
+            </p>
+            <p>
+                Creado por <a href="https://maximalista.coop" target="_blank" rel="noopener">Compañía Maximalista S.Coop.</a><a href="https://maximalista.coop" target="_blank" rel="noopener"><img src="maximalista.png" alt="Logo Maximalista" style="vertical-align: middle; margin: 0 5px;"></a>
+            </p>
             <p>
                 <a class="github-link" href="https://github.com/ciamaximalista/inanna" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 0.4em;">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
                     </svg>
                     Ver el código en GitHub
                 </a>
             </p>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
 </body>
 </html>
