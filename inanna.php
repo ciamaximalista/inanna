@@ -995,10 +995,13 @@ if (is_logged_in()) {
                         <div class="template-option" data-template="c" title="Imagen apaisada inferior"><div style="border:1px solid #333; height: 80px; display:flex; flex-direction:column;"><div style="height:80%; display:flex; align-items:center; justify-content:center;">T</div><div style="height:20%; background:#ccc;"></div></div></div>
                         <div class="template-option" data-template="e" title="Imagen vertical derecha"><div style="border:1px solid #333; height: 80px; display:flex;"><div style="width:75%; display:flex; align-items:center; justify-content:center;">T</div><div style="width:25%; background:#ccc;"></div></div></div>
                         <div class="template-option" data-template="f" title="Imagen vertical izquierda"><div style="border:1px solid #333; height: 80px; display:flex;"><div style="width:25%; background:#ccc;"></div><div style="width:75%; display:flex; align-items:center; justify-content:center;">T</div></div></div>
+                        <div class="template-option" data-template="d" title="Imagen 50% superior, texto 50% inferior"><div style="border:1px solid #333; height: 80px; display:flex; flex-direction:column;"><div style="height:50%; background:#ccc;"></div><div style="height:50%; display:flex; align-items:center; justify-content:center;">T</div></div></div>
+                        <div class="template-option" data-template="i" title="Texto 50% superior, imagen 50% inferior"><div style="border:1px solid #333; height: 80px; display:flex; flex-direction:column;"><div style="height:50%; display:flex; align-items:center; justify-content:center;">T</div><div style="height:50%; background:#ccc;"></div></div></div>
                     </div>
                     <br>
                     <form id="download-form" method="POST" action="generar_pdf.php" target="_blank">
                         <input type="hidden" name="presentation_data" id="presentation-data-input">
+                        <input type="hidden" name="presentation_name" id="presentation-name-input">
                                             <button type="submit" id="download-pdf">Descargar PDF</button>
                                             <button type="button" id="save-presentation" class="save-presentation-btn" style="margin-left: 10px;">Guardar</button>
                                         </form>                </div>

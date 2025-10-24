@@ -368,6 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
            h: 'layout-h',
            b: 'layout-b',
            c: 'layout-c',
+           d: 'layout-d',
+           i: 'layout-i',
            e: 'layout-e',
             f: 'layout-f',
             fullscreen: 'layout-fullscreen',
@@ -469,6 +471,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     let bottomCell = mediaBlock;
                     let topStyle = `height:76%; vertical-align: top; padding-bottom:${gapSmallPx}px;`;
                     let bottomStyle = `height:24%; vertical-align: middle; padding-top:${gapSmallPx}px;`;
+                    slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-content-cell" style="${topStyle}">${topCell}</td></tr><tr><td class="slide-cell slide-media-cell" style="${bottomStyle}">${bottomCell}</td></tr></table>`;
+                }
+                break;
+            case 'd':
+                {
+                    let topCell = mediaBlock;
+                    let bottomCell = contentBlock;
+                    let topStyle = `height:50%; vertical-align: middle; padding-bottom:${gapSmallPx}px;`;
+                    let bottomStyle = `height:50%; vertical-align: top; padding-top:${gapSmallPx}px;`;
+                    slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-media-cell" style="${topStyle}">${topCell}</td></tr><tr><td class="slide-cell slide-content-cell" style="${bottomStyle}">${bottomCell}</td></tr></table>`;
+                }
+                break;
+            case 'i':
+                {
+                    let topCell = contentBlock;
+                    let bottomCell = mediaBlock;
+                    let topStyle = `height:50%; vertical-align: top; padding-bottom:${gapSmallPx}px;`;
+                    let bottomStyle = `height:50%; vertical-align: middle; padding-top:${gapSmallPx}px;`;
                     slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-content-cell" style="${topStyle}">${topCell}</td></tr><tr><td class="slide-cell slide-media-cell" style="${bottomStyle}">${bottomCell}</td></tr></table>`;
                 }
                 break;
@@ -642,12 +662,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    const presentationNameInput = document.getElementById('presentation-name-input');
+
     downloadBtn.addEventListener('click', (e) => {
         e.preventDefault();
         presentationDataInput.value = JSON.stringify({
             slides: presentationData,
             styles: appStyles
         });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const editFile = urlParams.get('edit');
+
+        let filename = editFile || document.body.dataset.currentEdit || 'inanna-presentacion';
+        filename = filename.replace(/\.xml$/, '');
+        presentationNameInput.value = filename;
+
         downloadForm.submit();
     });
 

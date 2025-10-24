@@ -6,6 +6,8 @@ if (!is_logged_in()) {
     die('Acceso denegado. Debes iniciar sesión.');
 }
 
+file_put_contents(__DIR__ . '/data/inanna_post.log', print_r($_POST, true));
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 function extract_primary_font(string $fontValue, string $fallback = 'Arial'): string {
@@ -331,6 +333,8 @@ if (isset($_POST['presentation_data'])) {
         'h' => 'layout-h',
         'b' => 'layout-b',
         'c' => 'layout-c',
+        'd' => 'layout-d',
+        'i' => 'layout-i',
         'e' => 'layout-e',
         'f' => 'layout-f',
     ];
@@ -440,17 +444,27 @@ if (isset($_POST['presentation_data'])) {
                 . '<td class="slide-cell slide-content-cell" style="' . $leftStyle . '">' . $leftCell . '</td>'
                 . '<td class="slide-cell slide-media-cell" style="' . $rightStyle . '">' . $rightCell . '</td>'
                 . '</tr></table>';
-        } elseif (in_array($layoutClass, ['layout-b', 'layout-c'], true)) {
+        } elseif (in_array($layoutClass, ['layout-b', 'layout-c', 'layout-d', 'layout-i'], true)) {
             if ($layoutClass === 'layout-b') {
                 $topCell = $mediaBlock;
                 $bottomCell = $contentBlock;
                 $topStyle = 'height:24%; vertical-align: middle; padding-bottom:' . $gapSmallMm . 'mm;';
                 $bottomStyle = 'height:76%; vertical-align: top; padding-top:' . $gapSmallMm . 'mm;';
-            } else {
+            } elseif ($layoutClass === 'layout-c') {
                 $topCell = $contentBlock;
                 $bottomCell = $mediaBlock;
                 $topStyle = 'height:76%; vertical-align: top; padding-bottom:' . $gapSmallMm . 'mm;';
                 $bottomStyle = 'height:24%; vertical-align: middle; padding-top:' . $gapSmallMm . 'mm;';
+            } elseif ($layoutClass === 'layout-d') {
+                $topCell = $mediaBlock;
+                $bottomCell = $contentBlock;
+                $topStyle = 'height:50%; vertical-align: middle; padding-bottom:' . $gapSmallMm . 'mm;';
+                $bottomStyle = 'height:50%; vertical-align: top; padding-top:' . $gapSmallMm . 'mm;';
+            } else { // layout-i
+                $topCell = $contentBlock;
+                $bottomCell = $mediaBlock;
+                $topStyle = 'height:50%; vertical-align: top; padding-bottom:' . $gapSmallMm . 'mm;';
+                $bottomStyle = 'height:50%; vertical-align: middle; padding-top:' . $gapSmallMm . 'mm;';
             }
 
             $slideTable = '<table class="slide-table"><tr>'
@@ -470,7 +484,15 @@ if (isset($_POST['presentation_data'])) {
 
     $finalHtml .= '</body></html>';
 
-    $downloadName = 'inanna-presentacion.pdf';
+    $presentationName = 'inanna-presentacion';
+    if (!empty($_POST['presentation_name'])) {
+        $presentationName = preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['presentation_name']);
+        if (empty($presentationName)) {
+            $presentationName = 'inanna-presentacion';
+        }
+    }
+    $downloadName = $presentationName . '.pdf';
+
     if (try_generate_pdf_with_wkhtmltopdf($finalHtml, $downloadName, $pageWidthMm, $pageHeightMm)) {
         exit;
     }
