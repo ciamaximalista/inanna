@@ -378,6 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 align-items: center;
                 justify-content: center;
             }
+            .slide-media.cover-h { background-size: auto 100%; }
+            .slide-media.cover-w { background-size: 100% auto; }
         </style>`;
 
        const layoutClassMap = {
@@ -404,8 +406,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (template !== 'a') {
             const hasImage = Boolean(imageSrc);
             let mediaBaseClass = requiresSquareMedia ? 'slide-media square' : 'slide-media';
+
+            const isFillHeight = ['z', 'y', 'e', 'f'].includes(template);
+            const isFillWidth = ['b', 'c', 'd', 'i'].includes(template);
+
+            if (isFillHeight) {
+                mediaBaseClass += ' cover-h';
+            } else if (isFillWidth) {
+                mediaBaseClass += ' cover-w';
+            }
+
             if (hasImage) {
-                const escaped = imageSrc.replace(/(["'\\])/g, '\\$1');
+                const escaped = imageSrc.replace(/([\"'\\])/g, '\\$1');
                 mediaBlock = `<div class="${mediaBaseClass} has-image" data-placeholder-id="1" style="background-image:url('${escaped}'); background-repeat: no-repeat;"></div>`;
             } else {
                 mediaBlock = `<div class="${mediaBaseClass} placeholder" data-placeholder-id="1"><span>Haz clic para añadir imagen</span></div>`;

@@ -311,6 +311,8 @@ if (isset($_POST['presentation_data'])) {
         '.slide-square-cell { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; }',
         '.slide-media.square { width: 90mm; height: 90mm; max-width: 100%; border-radius: 18px; margin-left: auto; }',
         '.slide-media.square.placeholder { display: flex; align-items: center; justify-content: center; }',
+        '.slide-media.cover-h { background-size: auto 100%; }',
+        '.slide-media.cover-w { background-size: 100% auto; }',
         '.slide-page h1, .slide-page h2, .slide-page h3, .slide-page h4, .slide-page h5, .slide-page h6 { font-family: "' . addslashes($titleFont) . '", sans-serif; font-weight: ' . $titleWeightBold . '; margin: 0; line-height: 1.15; page-break-before: avoid; break-before: avoid; page-break-after: avoid; break-after: avoid; }',
         '.slide-page h1 { color: ' . $styles['color_h1'] . '; margin-bottom: 0.2em; font-size: ' . $h1FontPt . 'pt; }',
         '.slide-page h2 { color: ' . $styles['color_h2'] . '; font-size: ' . $h2FontPt . 'pt; }',
@@ -363,6 +365,16 @@ if (isset($_POST['presentation_data'])) {
 
         if ($template !== 'a') {
             $mediaClass = 'slide-media' . ($requiresSquareMedia ? ' square' : '');
+
+            $isFillHeight = in_array($template, ['z', 'y', 'e', 'f'], true);
+            $isFillWidth = in_array($template, ['b', 'c', 'd', 'i'], true);
+
+            if ($isFillHeight) {
+                $mediaClass .= ' cover-h';
+            } else if ($isFillWidth) {
+                $mediaClass .= ' cover-w';
+            }
+
             $mediaBlock = '<div class="' . $mediaClass . ' placeholder"><span>Añade una imagen</span></div>';
             if (!empty($imageSrc)) {
                 $backgroundUrl = null;
