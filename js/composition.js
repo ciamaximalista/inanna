@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 height: 100%;
                 border-radius: 18px;
                 overflow: hidden;
-                background-color: ${appStyles.color_box};
+                background-color: ${appStyles.color_bg};
                 background-position: center;
                 background-size: contain;
                 cursor: pointer;
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let mediaBaseClass = requiresSquareMedia ? 'slide-media square' : 'slide-media';
             if (hasImage) {
                 const escaped = imageSrc.replace(/(["'\\])/g, '\\$1');
-                mediaBlock = `<div class="${mediaBaseClass} has-image" data-placeholder-id="1" style="background-image:url('${escaped}');"></div>`;
+                mediaBlock = `<div class="${mediaBaseClass} has-image" data-placeholder-id="1" style="background-image:url('${escaped}'); background-repeat: no-repeat;"></div>`;
             } else {
                 mediaBlock = `<div class="${mediaBaseClass} placeholder" data-placeholder-id="1"><span>Haz clic para añadir imagen</span></div>`;
             }
