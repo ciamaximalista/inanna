@@ -261,8 +261,8 @@ if (isset($_POST['presentation_data'])) {
 
     // --- Build the HTML for the PDF ---
     $scaleFactor = 1.16;
-    $pageWidthMm = 297 + 30; // extend workspace 3cm to the right
-    $pageHeightMm = 210 + 20; // extend workspace 2cm downwards
+    $pageWidthMm = 297;
+    $pageHeightMm = 210;
 
     $slidePadding = [
         'top' => 8,
@@ -337,6 +337,7 @@ if (isset($_POST['presentation_data'])) {
         'i' => 'layout-i',
         'e' => 'layout-e',
         'f' => 'layout-f',
+        'fullscreen' => 'layout-fullscreen',
     ];
 
     $total_slides = count($slides);
@@ -359,6 +360,7 @@ if (isset($_POST['presentation_data'])) {
 
         $requiresSquareMedia = in_array($template, ['g', 'h'], true);
         $mediaBlock = '';
+
         if ($template !== 'a') {
             $mediaClass = 'slide-media' . ($requiresSquareMedia ? ' square' : '');
             $mediaBlock = '<div class="' . $mediaClass . ' placeholder"><span>Añade una imagen</span></div>';
@@ -381,8 +383,7 @@ if (isset($_POST['presentation_data'])) {
                         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
                         $scriptName = $_SERVER['PHP_SELF'] ?? '';
                         $basePath = rtrim(dirname($scriptName), '/');
-                        $absolute = $protocol . $host . ($basePath ? '/' . ltrim($basePath, '/') : '') . '/' . $relativeImage;
-                        $backgroundUrl = $absolute;
+                        $backgroundUrl = $protocol . $host . ($basePath ? '/' . ltrim($basePath, '/') : '') . '/' . $relativeImage;
                     }
                 }
 
@@ -398,6 +399,10 @@ if (isset($_POST['presentation_data'])) {
         if ($layoutClass === 'layout-a') {
             $slideTable = '<table class="slide-table"><tr>'
                 . '<td class="slide-cell slide-content-cell" style="height:100%; text-align:center; vertical-align: middle;">' . $contentBlock . '</td>'
+                . '</tr></table>';
+        } elseif ($layoutClass === 'layout-fullscreen') {
+            $slideTable = '<table class="slide-table"><tr>'
+                . '<td class="slide-cell slide-media-cell" style="width: 100%; vertical-align: middle; height:100%;">' . $mediaBlock . '</td>'
                 . '</tr></table>';
         } elseif ($template === 'g') {
             $leftCell = $contentBlock;

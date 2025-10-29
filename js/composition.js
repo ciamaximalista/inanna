@@ -158,10 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const pageWidthPx = mmToPx(pageWidthMm);
         const pageHeightPx = mmToPx(pageHeightMm);
 
-        const paddingTopPx = mmToPx(8);
-        const paddingLeftPx = mmToPx(10);
-        const paddingRightPx = mmToPx(1);
-        const paddingBottomPx = mmToPx(1);
+        const paddingTopPx = mmToPx(6);
+        const paddingLeftPx = mmToPx(8);
+        const paddingRightPx = mmToPx(0.5);
+        const paddingBottomPx = mmToPx(0.5);
 
         const contentPaddingRightPx = mmToPx(2);
         const contentPaddingLeftPx = mmToPx(6 * scaleFactor);
@@ -297,9 +297,28 @@ document.addEventListener('DOMContentLoaded', () => {
             .slide-page a { color: ${appStyles.color_highlight}; text-decoration: none; }
             .slide-page strong,
             .slide-page b { color: ${appStyles.color_highlight}; font-weight: 700; }
-            .slide-page.layout-fullscreen { padding: 0; }
-            .slide-page.layout-fullscreen .slide-table { height: 100%; }
-            .slide-page.layout-fullscreen .slide-cell { padding: 0; }
+            .slide-page.layout-fullscreen {
+                padding: ${paddingTopPx}px ${paddingRightPx}px ${paddingBottomPx}px ${paddingLeftPx}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+            }
+            .slide-media.fullscreen {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                border-radius: 18px;
+                overflow: hidden;
+                background-color: ${appStyles.color_bg};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
             .slide-page blockquote {
                 background-color: ${appStyles.color_box};
                 padding: 1em;
@@ -324,8 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 color: #555;
                 text-align: center;
             }
-            .slide-media.fullscreen {
-                border-radius: 0;
+            .slide-media.fullscreen.placeholder {
+                border: 2px dashed #d0d0d0;
+                color: #777;
+                font-size: ${12 * scaleFactor}pt;
             }
             .slide-media.placeholder {
                 border: 2px dashed #d0d0d0;
@@ -376,17 +397,14 @@ document.addEventListener('DOMContentLoaded', () => {
        };
 
         const layoutClass = layoutClassMap[template] || 'layout-a';
-        const contentClass = template === 'a' ? 'slide-content centered' : 'slide-content';
-        const contentBlock = `<div class="${contentClass}"><div class="slide-content-inner"><div>${slideHtmlContent}</div></div></div>`;
+    const contentClass = template === 'a' ? 'slide-content centered' : 'slide-content';
+    const contentBlock = `<div class="${contentClass}"><div class="slide-content-inner"><div>${slideHtmlContent}</div></div></div>`;
 
         const requiresSquareMedia = template === 'g' || template === 'h';
         let mediaBlock = '';
         if (template !== 'a') {
-            let mediaBaseClass = requiresSquareMedia ? 'slide-media square' : 'slide-media';
-            if (template === 'fullscreen') {
-                mediaBaseClass = 'slide-media fullscreen';
-            }
             const hasImage = Boolean(imageSrc);
+            let mediaBaseClass = requiresSquareMedia ? 'slide-media square' : 'slide-media';
             if (hasImage) {
                 const escaped = imageSrc.replace(/(["'\\])/g, '\\$1');
                 mediaBlock = `<div class="${mediaBaseClass} has-image" data-placeholder-id="1" style="background-image:url('${escaped}');"></div>`;
@@ -399,8 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let slideTable = '';
         switch (template) {
             case 'fullscreen':
-                pageInlineStyle = 'padding:0;';
-                slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-fullscreen-cell">${mediaBlock}</td></tr></table>`;
+                pageInlineStyle = '';
+                slideTable = `<table class="slide-table"><tr><td class="slide-cell slide-media-cell" style="width: 100%; vertical-align: middle; height:100%;">${mediaBlock}</td></tr></table>`;
                 break;
             case 'z':
                 {
