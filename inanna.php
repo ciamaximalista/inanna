@@ -369,11 +369,33 @@ if (is_logged_in()) {
     // List resources
     $resources = [];
     if (is_dir(RESOURCES_DIR)) {
-        $files = scandir(RESOURCES_DIR);
+        // Use array_diff to remove . and ..
+        $files = array_diff(scandir(RESOURCES_DIR), ['.', '..']);
+        
+        // Create an array of file paths with their modification times
+        $files_with_time = [];
         foreach ($files as $file) {
-            if ($file !== '.' && $file !== '..') { $resources[] = 'recursos/' . $file; }
+            $filepath = RESOURCES_DIR . '/' . $file;
+            $files_with_time[$filepath] = filemtime($filepath);
+        }
+        
+        // Sort files by modification time in descending order (newest first)
+        arsort($files_with_time);
+        
+        // Create the final resources array
+        foreach (array_keys($files_with_time) as $filepath) {
+            $resources[] = 'recursos/' . basename($filepath);
         }
     }
+
+    // Pagination for Resources tab
+    $resources_per_page = 12;
+    $total_resources = count($resources);
+    $total_pages_resources = ceil($total_resources / $resources_per_page);
+    $current_page_resources = isset($_GET['page_resources']) ? (int)$_GET['page_resources'] : 1;
+    $current_page_resources = max(1, min($current_page_resources, $total_pages_resources ?: 1));
+    $offset_resources = ($current_page_resources - 1) * $resources_per_page;
+    $paginated_resources = array_slice($resources, $offset_resources, $resources_per_page);
 
     $presentations = [];
     $archive_dir = __DIR__ . '/data/archivo/';
@@ -902,12 +924,19 @@ if (is_logged_in()) {
             <?php if ($resource_session_error): ?><p class="error"><?php echo htmlspecialchars($resource_session_error); ?></p><?php endif; ?>
             <hr style="margin: 20px 0;">
             <h4>Archivos Subidos</h4>
-            <div class="resources-gallery" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                <?php if (empty($resources)): ?>
-                    <p>No has subido ningún archivo todavía.</p>
+            <div class="resources-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
+                <?php if (empty($paginated_resources)):
+                    $error_message = $_SESSION['resource_error'] ?? null;
+                    if ($error_message) {
+                        echo '<p class="error">' . htmlspecialchars($error_message) . '</p>';
+                        unset($_SESSION['resource_error']);
+                    } else {
+                        echo '<p>No has subido ningún archivo todavía.</p>';
+                    }
+                ?>
                 <?php else: ?>
-                    <?php foreach ($resources as $resource): ?>
-                        <div class="resource-item" style="width: 180px; display:flex; flex-direction:column; gap:6px;">
+                    <?php foreach ($paginated_resources as $resource): ?>
+                        <div class="resource-item" style="display:flex; flex-direction:column; gap:6px;">
                             <?php 
                                 $file_ext = strtolower(pathinfo($resource, PATHINFO_EXTENSION));
                                 $is_image = in_array($file_ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
@@ -923,6 +952,24 @@ if (is_logged_in()) {
                             </div>
                         </div>
                     <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            <div class="pagination" style="margin-top: 20px; text-align: center;">
+                <?php if ($total_pages_resources > 1): ?>
+                    <?php
+                        $edit_param = $current_edit_param ? '&edit=' . urlencode($current_edit_param) : '';
+                    ?>
+                    <?php if ($current_page_resources > 1): ?>
+                        <a href="?tab=Recursos&page_resources=<?php echo $current_page_resources - 1; ?><?php echo $edit_param; ?>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; margin: 0 2px;">&laquo; Anterior</a>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $total_pages_resources; $i++): ?>
+                        <a href="?tab=Recursos&page_resources=<?php echo $i; ?><?php echo $edit_param; ?>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; margin: 0 2px; <?php echo ($i == $current_page_resources) ? 'background-color: var(--color-title); color: white; border-color: var(--color-title);' : ''; ?>"><?php echo $i; ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($current_page_resources < $total_pages_resources): ?>
+                        <a href="?tab=Recursos&page_resources=<?php echo $current_page_resources + 1; ?><?php echo $edit_param; ?>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; margin: 0 2px;">Siguiente &raquo;</a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
             <div id="resource-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1100; align-items:center; justify-content:center;">
@@ -1060,20 +1107,21 @@ if (is_logged_in()) {
             <?php endif; ?>
         </div>
 
-        <div id="resource-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-            <div style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 900px; border-radius: 8px;">
+        <div id="resource-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); text-align: center;">
+            <div style="background-color: #fefefe; margin-top: 10%; display: inline-block; padding: 20px; border: 1px solid #888; border-radius: 8px; text-align: left;">
                 <span id="close-modal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
                 <h3>Elige un Recurso</h3>
-                <div id="modal-resource-gallery" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <div id="modal-resource-gallery" style="display: flex; gap: 10px;">
                     <?php foreach ($resources as $resource): ?>
                         <?php 
                             $file_ext = strtolower(pathinfo($resource, PATHINFO_EXTENSION));
                             if (in_array($file_ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])):
                         ?>
-                            <img src="<?php echo htmlspecialchars($resource); ?>" class="modal-resource-item" style="width: 150px; height: auto; border-radius: 4px; cursor: pointer;" data-resource-path="<?php echo htmlspecialchars($resource); ?>">
+                            <img src="<?php echo htmlspecialchars($resource); ?>" class="modal-resource-item" style="display: block; max-width: 150px; max-height: 120px; width: auto; height: auto; border-radius: 4px; cursor: pointer;" data-resource-path="<?php echo htmlspecialchars($resource); ?>">
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
+                <div class="pagination-modal" style="margin-top: 15px; text-align: center;"></div>
             </div>
         </div>
     </div>
@@ -1186,6 +1234,70 @@ function openTab(evt, tabName) {
     <br>
     Creado por <a href="https://maximalista.coop" target="_blank">Compañía Maximalista S.Coop.</a>
 </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal pagination
+    const modalGallery = document.getElementById('modal-resource-gallery');
+    if (modalGallery) {
+        const items = modalGallery.querySelectorAll('.modal-resource-item');
+        const itemsPerPage = 8;
+        const totalItems = items.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        let currentPage = 1;
+
+        function showPage(page) {
+            currentPage = page;
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            items.forEach((item, index) => {
+                item.style.display = (index >= start && index < end) ? 'block' : 'none';
+            });
+
+            // Update pagination controls
+            const paginationControls = modalGallery.nextElementSibling;
+            paginationControls.innerHTML = '';
+
+            if (totalPages > 1) {
+                if (currentPage > 1) {
+                    const prevButton = document.createElement('button');
+                    prevButton.type = 'button';
+                    prevButton.textContent = 'Anterior';
+                    prevButton.onclick = () => showPage(currentPage - 1);
+                    prevButton.style.margin = '0 5px';
+                    paginationControls.appendChild(prevButton);
+                }
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.type = 'button';
+                    pageButton.textContent = i;
+                    pageButton.onclick = () => showPage(i);
+                    if (i === currentPage) {
+                        pageButton.disabled = true;
+                    }
+                    pageButton.style.margin = '0 5px';
+                    paginationControls.appendChild(pageButton);
+                }
+
+                if (currentPage < totalPages) {
+                    const nextButton = document.createElement('button');
+                    nextButton.type = 'button';
+                    nextButton.textContent = 'Siguiente';
+                    nextButton.onclick = () => showPage(currentPage + 1);
+                    nextButton.style.margin = '0 5px';
+                    paginationControls.appendChild(nextButton);
+                }
+            }
+        }
+
+        if (totalItems > itemsPerPage) {
+            showPage(1);
+        }
+    }
+});
+</script>
 
 </body>
 </html>
