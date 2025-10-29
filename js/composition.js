@@ -334,8 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 overflow: hidden;
                 background-color: ${appStyles.color_box};
                 background-position: center;
-                background-repeat: no-repeat;
-                background-size: cover;
+                background-size: contain;
                 cursor: pointer;
                 display: flex;
                 align-items: center;

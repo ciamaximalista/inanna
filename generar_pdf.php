@@ -304,7 +304,7 @@ if (isset($_POST['presentation_data'])) {
         '.slide-content ol { counter-reset: ordered; }',
         '.slide-content ol li { counter-increment: ordered; }',
         '.slide-content ol li::before { content: counter(ordered) "."; position: absolute; left: 0; top: 0.05em; font-family: "' . addslashes($titleFont) . '", sans-serif; color: ' . $styles['color_highlight'] . '; font-weight: ' . $titleWeightBold . '; }',
-        '.slide-media { width: 100%; height: 100%; border-radius: 18px; overflow: hidden; background-color: ' . $styles['color_box'] . '; background-size: cover; background-position: center; background-repeat: no-repeat; }',
+        '.slide-media { width: 100%; height: 100%; border-radius: 18px; overflow: hidden; background-color: ' . $styles['color_box'] . '; background-size: contain; background-position: center; background-repeat: no-repeat; }',
         '.slide-media.placeholder { border: 2px dashed #d0d0d0; color: #777; font-size: ' . $placeholderFontPt . 'pt; text-align: center; padding: ' . (6 * $scaleFactor) . 'mm; }',
         '.slide-media.placeholder span { display: block; }',
         '.slide-media.has-image { color: transparent; }',
