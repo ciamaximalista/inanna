@@ -31,6 +31,40 @@ document.addEventListener('DOMContentLoaded', () => {
         return escaped;
     };
 
+    const splitMarkdownIntoSlides = (markdown) => {
+        const normalized = String(markdown ?? '').replace(/\r\n/g, '\n');
+        if (normalized.trim() === '') {
+            return [];
+        }
+
+        const lines = normalized.split('\n');
+        const slides = [];
+        let buffer = [];
+        let sawDelimiter = false;
+
+        const flush = (forceEmpty = false) => {
+            const hasContent = buffer.some(line => line.trim() !== '');
+            if (hasContent) {
+                slides.push(buffer.join('\n').trim());
+            } else if (forceEmpty) {
+                slides.push('');
+            }
+            buffer = [];
+        };
+
+        lines.forEach((line) => {
+            if (/^\s*---\s*$/.test(line)) {
+                flush(buffer.length > 0 || sawDelimiter);
+                sawDelimiter = true;
+            } else {
+                buffer.push(line);
+            }
+        });
+        flush(buffer.length > 0 || sawDelimiter);
+
+        return slides;
+    };
+
     // --- STATE ---
     let presentationData = [];
     let currentSlideIndex = 0;
@@ -582,47 +616,59 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Parsing markdown from textarea (or re-parsing after initial load).');
             const md = markdownSource.value;
             console.log('Markdown read from textarea:', md);
-            const slides = md.split('---').map(s => s.trim()).filter(s => s);
+            const slides = splitMarkdownIntoSlides(md);
             console.log('Parsed slides from textarea:', slides);
 
             const previousData = presentationData.slice();
-            const result = [];
-            let oldIndex = 0;
+            const usedPrevIndices = new Set();
 
-            for (let newIndex = 0; newIndex < slides.length; newIndex++) {
-                const newMarkdown = slides[newIndex];
-                let matched = false;
-
-                while (oldIndex < previousData.length) {
-                    const currentOld = previousData[oldIndex];
-
-                    if (currentOld.markdown === newMarkdown) {
-                        result.push({
-                            markdown: newMarkdown,
-                            template: currentOld.template || 'a',
-                            image: currentOld.image || null
-                        });
-                        oldIndex++;
-                        matched = true;
-                        break;
+            const claimPreviousSlide = (predicate) => {
+                for (let i = 0; i < previousData.length; i++) {
+                    if (usedPrevIndices.has(i)) { continue; }
+                    const candidate = previousData[i];
+                    if (predicate(candidate, i)) {
+                        usedPrevIndices.add(i);
+                        return candidate;
                     }
+                }
+                return null;
+            };
 
-                    const nextOld = previousData[oldIndex + 1];
-                    if (nextOld && nextOld.markdown === newMarkdown) {
-                        oldIndex++;
-                        continue;
+            const claimByIndex = (index) => {
+                if (index < 0 || index >= previousData.length) { return null; }
+                if (usedPrevIndices.has(index)) { return null; }
+                usedPrevIndices.add(index);
+                return previousData[index];
+            };
+
+            const result = slides.map((newMarkdown, newIndex) => {
+                let matchedSlide = claimPreviousSlide(prev => prev.markdown === newMarkdown);
+
+                if (!matchedSlide) {
+                    const newKey = getSlideKey(newMarkdown);
+                    if (newKey) {
+                        matchedSlide = claimPreviousSlide(prev => getSlideKey(prev.markdown) === newKey);
                     }
-                    break;
                 }
 
-                if (!matched) {
-                    result.push({
+                if (!matchedSlide && slides.length === previousData.length) {
+                    matchedSlide = claimByIndex(newIndex);
+                }
+
+                if (matchedSlide) {
+                    return {
                         markdown: newMarkdown,
-                        template: 'a',
-                        image: null
-                    });
+                        template: matchedSlide.template || 'a',
+                        image: matchedSlide.image || null
+                    };
                 }
-            }
+
+                return {
+                    markdown: newMarkdown,
+                    template: 'a',
+                    image: null
+                };
+            });
 
             presentationData = result;
         }
